@@ -12,6 +12,6 @@ settings
 4. Run the application  
     ```$ node app.js```
 
-## Licence
+## License
 
 [GPL 2+](http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt)
