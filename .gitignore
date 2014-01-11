@@ -1,0 +1,5 @@
+# Ignore contrib node modules
+node_modules/*
+
+# Ignore configuration file
+configs/config.json

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Bluethroat</title>
+    </head>
+    <body>
+        {{#if messages}}
+            <div class="messages">
+                {{#each messages}}
+                    <div class="messages--item">{{this}}</div>
+                {{/each}}
+            </div>
+        {{/if}}
+
+        <div class="content">
+            <div class="controls">
+                <a href="/stop">Stop</a><br/>
+                <a href="/play">Play</a>
+            </div>
+
+            <div class="settings-form">
+                <form action="/" method="post">
+                    {{{settingsForm}}}
+
+                    <div class="field">
+                        <input type="submit" value="Save" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>

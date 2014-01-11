@@ -1,0 +1,10 @@
+{
+    "server": {
+        "port": 8000
+    },
+    "mpd": {
+        "host": "localhost",
+        "port": 6600
+    },
+    "radioStations": {}
+}
