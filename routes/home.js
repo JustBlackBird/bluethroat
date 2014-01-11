@@ -78,9 +78,7 @@ exports.init = function(app) {
         settingsForm.handle(req, {
             success: function (form) {
                 // Save settings
-                if (form.data.useAlarm) {
-                    app.enable('alarm');
-                }
+                app.set('alarm', !!form.data.useAlarm);
                 app.set('wake up hour', form.data.wakeUpHour);
                 app.set('wake up minute', form.data.wakeUpMinute);
                 app.radio.setCurrentStation(form.data.radioStation);
