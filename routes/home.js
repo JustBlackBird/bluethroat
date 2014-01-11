@@ -54,8 +54,8 @@ exports.init = function(app) {
         // Set default settings values and render the settings form
         var renderedSettingsForm = settingsForm.bind({
             useAlarm: app.enabled('alarm'),
-            wakeUpHour: app.get('wake up hour'),
-            wakeUpMinute: app.get('wake up minute'),
+            wakeUpHour: app.get('wake up hour').toString(),
+            wakeUpMinute: app.get('wake up minute').toString(),
             radioStation: app.radio.getCurrentStation()
         }).toHTML();
 
