@@ -1,10 +1,10 @@
 // Require libs
 var express = require('express'),
-    config = require('./libs/config.js'),
-    middleware = require('./libs/middleware.js'),
+    config = require('./lib/config.js'),
+    middleware = require('./lib/middleware.js'),
     routes = require('./routes/index.js'),
-    Radio = require('./libs/radio.js'),
-    alarm = require('./libs/alarm');
+    Radio = require('./lib/radio.js'),
+    alarm = require('./lib/alarm');
 
 // Initialize sound controller
 var radio = new Radio(
