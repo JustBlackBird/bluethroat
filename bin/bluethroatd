@@ -16,13 +16,13 @@ switch (process.argv[2]) {
         }
 
         bluethroatd.start('./app.js');
-        console.log('Bluethroat is started.');
+        console.log('Bluethroat has been started.');
         break;
 
     case 'stop':
         if (bluethroatd.isRunning()) {
             bluethroatd.stop();
-            console.log('Bluethroat is stopped.');
+            console.log('Bluethroat has been stopped.');
         } else {
             console.log('Bluethroat is not currently running.');
             process.exit(1);
