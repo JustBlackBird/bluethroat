@@ -10,6 +10,11 @@ var bluethroatd = new Daemon();
 
 switch (process.argv[2]) {
     case 'start':
+        if (bluethroatd.isRunning()) {
+            console.log('Bluethroat is already running.');
+            process.exit(1);
+        }
+
         bluethroatd.start('./app.js');
         console.log('Bluethroat is started.');
         break;
@@ -20,6 +25,7 @@ switch (process.argv[2]) {
             console.log('Bluethroat is stopped.');
         } else {
             console.log('Bluethroat is not currently running.');
+            process.exit(1);
         }
         break;
 
@@ -28,6 +34,7 @@ switch (process.argv[2]) {
             console.log('Bluethroat is running.');
         } else {
             console.log('Bluethroat is not running.');
+            process.exit(1);
         }
         break;
 
