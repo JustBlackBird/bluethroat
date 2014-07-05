@@ -1,0 +1,36 @@
+#!/usr/bin/env node
+
+var path = require('path'),
+    Daemon = require('../lib/daemon.js');
+
+// Change working direcotry to the Application root.
+process.chdir(path.normalize(path.dirname(process.argv[1]) + '/../'));
+
+var bluethroatd = new Daemon();
+
+switch (process.argv[2]) {
+    case 'start':
+        bluethroatd.start('./app.js');
+        console.log('Bluethroat is started.');
+        break;
+
+    case 'stop':
+        if (bluethroatd.isRunning()) {
+            bluethroatd.stop();
+            console.log('Bluethroat is stopped.');
+        } else {
+            console.log('Bluethroat is not currently running.');
+        }
+        break;
+
+    case 'status':
+        if (bluethroatd.isRunning()) {
+            console.log('Bluethroat is running.');
+        } else {
+            console.log('Bluethroat is not running.');
+        }
+        break;
+
+    default:
+        console.log('Usage: bluethroatd start|stop|status');
+}
