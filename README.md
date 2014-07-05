@@ -10,7 +10,7 @@ Music alarm clock that helps to wake up in the mornings.
 3. Copy configs/default_config.json to configs/config.json and update the
 settings
 4. Run the application  
-    ```$ node app.js```
+    ```$ ./bin/bluethroatd start```
 
 ## License
 
