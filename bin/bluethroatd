@@ -1,12 +1,19 @@
 #!/usr/bin/env node
 
 var path = require('path'),
-    Daemon = require('../lib/daemon.js');
+    Daemon = require('../lib/daemon.js'),
+    config = require('../lib/config.js').server || {};
 
 // Change working direcotry to the Application root.
 process.chdir(path.normalize(path.dirname(process.argv[1]) + '/../'));
 
-var bluethroatd = new Daemon();
+var bluethroatd = new Daemon({
+    log: config.log || false,
+    errorLog: config.errorLog || false,
+    pid: config.pid || (process.cwd() + '/bluethroatd.pid'),
+    uid: config.uid || process.getuid(),
+    gid: config.gid || process.getgid(),
+});
 
 switch (process.argv[2]) {
     case 'start':
