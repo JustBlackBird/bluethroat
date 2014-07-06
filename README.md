@@ -12,7 +12,7 @@ settings
 4. Run the application  
     ```$ ./bin/bluethroatd start```
 
-### Start with the system
+## Start with the system
 
 There is an init.d script shipped with bluethroat, thus it can be easily started
 with the system. Here is an example of how it can be done on Debian:
