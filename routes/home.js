@@ -52,10 +52,11 @@ exports.init = function(app) {
     // Register routes
     app.get('/', function(req, res) {
         // Set default settings values and render the settings form
+        var alarmRingTime = app.alarm.getTime();
         var renderedSettingsForm = settingsForm.bind({
-            useAlarm: app.enabled('alarm'),
-            wakeUpHour: app.get('wake up hour').toString(),
-            wakeUpMinute: app.get('wake up minute').toString(),
+            useAlarm: app.alarm.isRunning(),
+            wakeUpHour: alarmRingTime.hour.toString(),
+            wakeUpMinute: alarmRingTime.minute.toString(),
             radioStation: app.radio.getCurrentStation()
         }).toHTML();
 
@@ -78,9 +79,16 @@ exports.init = function(app) {
         settingsForm.handle(req, {
             success: function (form) {
                 // Save settings
-                app.set('alarm', !!form.data.useAlarm);
-                app.set('wake up hour', form.data.wakeUpHour);
-                app.set('wake up minute', form.data.wakeUpMinute);
+                app.alarm.setTime(form.data.wakeUpHour, form.data.wakeUpMinute);
+                if (form.data.useAlarm) {
+                    if (!app.alarm.isRunning()) {
+                        app.alarm.run();
+                    }
+                } else {
+                    if (app.alarm.isRunning()) {
+                        app.alarm.stop();
+                    }
+                }
                 app.radio.setCurrentStation(form.data.radioStation);
 
                 // Redirect a user to home page

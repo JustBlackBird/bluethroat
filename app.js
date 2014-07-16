@@ -4,7 +4,7 @@ var express = require('express'),
     middleware = require('./lib/middleware.js'),
     routes = require('./routes/index.js'),
     Radio = require('./lib/radio.js'),
-    alarm = require('./lib/alarm');
+    AlarmClock = require('./lib/alarm_clock');
 
 // Initialize sound controller
 var radio = new Radio(
@@ -21,10 +21,15 @@ var radio = new Radio(
         // Attache radio to the application object
         app.radio = radio;
 
-        // Set default values for runtime configs
-        app.set('wake up hour', 9);
-        app.set('wake up minute', 45);
-        app.disable('alarm');
+        // Initialize alarm clock
+        app.alarm = new AlarmClock();
+        app.alarm.setTime(9, 45);
+        app.alarm.on('ring', function() {
+            if (!radio.isPlaying()) {
+                // Time to wake up. Turn on the radio
+                radio.fadeIn();
+            }
+        });
 
         // Use Handlebars template engine
         app.set('view engine', 'handlebars');
@@ -38,9 +43,6 @@ var radio = new Radio(
 
         app.use(middleware.notFound);
         app.use(middleware.serverError);
-
-        // Initialize alarm clock
-        alarm.init(app);
 
         // Initialize HTTP server
         var appPort = config.server.port || 8000;
