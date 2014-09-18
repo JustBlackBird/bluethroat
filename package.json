@@ -9,9 +9,9 @@
         "email": "simushevds@gmail.com"
     },
     "dependencies": {
-        "express": "4.5.1",
+        "express": "4.9.3",
         "hbs": "2.7.0",
-        "mpd": "1.0.2",
-        "forms": "0.7.0"
+        "mpd": "1.1.0",
+        "forms": "0.9.6"
     }
 }
