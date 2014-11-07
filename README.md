@@ -23,6 +23,6 @@ real path of the ```<bluethroat>/bin/bluethroatd``` daemon.
 4. Run ```update-rc.d bluethroatd defaults``` to create symlinks that are needed
 to start with the system.
 
-## License
+## Terms of Use
 
-[GPL 2+](http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt)
+Bluethroat is licensed under the terms of [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
