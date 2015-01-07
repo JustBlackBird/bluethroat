@@ -21,20 +21,26 @@ DAEMON="/opt/bluethroat/bin/bluethroatd"
 # node (/usr/local/bin) on startup
 PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin
 
+. /lib/lsb/init-functions
+
 start() {
-    $DAEMON start
+    msg=$($DAEMON start)
     if [ $? -ne 0 ]
     then
+        log_failure_msg $msg
         exit 1
     fi
+    log_success_msg $msg
 }
 
 stop() {
-    $DAEMON stop
+    msg=$($DAEMON stop)
     if [ $? -ne 0 ]
     then
+        log_failure_msg $msg
         exit 1
     fi
+    log_success_msg $msg
 }
 
 status() {
