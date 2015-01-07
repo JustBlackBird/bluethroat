@@ -18,29 +18,29 @@ var bluethroatd = new Daemon({
 switch (process.argv[2]) {
     case 'start':
         if (bluethroatd.isRunning()) {
-            console.log('Bluethroat is already running.');
+            console.log('Bluethroat is already running');
             process.exit(1);
         }
 
         bluethroatd.start('./app.js');
-        console.log('Bluethroat has been started.');
+        console.log('Bluethroat has been started');
         break;
 
     case 'stop':
         if (bluethroatd.isRunning()) {
             bluethroatd.stop();
-            console.log('Bluethroat has been stopped.');
+            console.log('Bluethroat has been stopped');
         } else {
-            console.log('Bluethroat is not currently running.');
+            console.log('Bluethroat is not currently running');
             process.exit(1);
         }
         break;
 
     case 'status':
         if (bluethroatd.isRunning()) {
-            console.log('Bluethroat is running.');
+            console.log('Bluethroat is running');
         } else {
-            console.log('Bluethroat is not running.');
+            console.log('Bluethroat is not running');
             process.exit(1);
         }
         break;
