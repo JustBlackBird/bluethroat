@@ -1,14 +1,21 @@
+var express = require('express');
+
 /**
- * Initialize '/play' route.
+ * Initializes radio play route.
  *
- * @param {Object} app Express application object
+ * @param {Radio} radio An instance of Radio.
+ * @returns {Object} Express application instance.
  */
-exports.init = function(app) {
+module.exports = function(radio) {
+    var app = express();
+
     app.get('/play', function(req, res, next) {
         // Play currently selected radio station
-        app.radio.play();
+        radio.play();
 
         // Redirect a user to home page
         res.redirect('/');
     });
+
+    return app;
 }

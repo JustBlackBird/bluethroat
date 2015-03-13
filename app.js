@@ -18,13 +18,10 @@ var radio = new Radio(
         // Initialize entire application
         var app = express();
 
-        // Attache radio to the application object
-        app.radio = radio;
-
         // Initialize alarm clock
-        app.alarm = new AlarmClock();
-        app.alarm.setTime(9, 45);
-        app.alarm.on('ring', function() {
+        var alarm = new AlarmClock();
+        alarm.setTime(9, 45);
+        alarm.on('ring', function() {
             if (!radio.isPlaying()) {
                 // Time to wake up. Turn on the radio
                 radio.fadeIn();
@@ -35,12 +32,13 @@ var radio = new Radio(
         app.set('view engine', 'handlebars');
         app.engine('handlebars', require('hbs').__express);
 
-        // Load and configure middleware
+        // Serve static files
         app.use(express.static(__dirname + '/public'));
 
-        // Initialize routes
-        routes.init(app);
+        // Mount routes
+        app.use('/', routes(radio, alarm));
 
+        // Mount other middleware
         app.use(middleware.notFound);
         app.use(middleware.serverError);
 

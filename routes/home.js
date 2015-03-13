@@ -1,16 +1,21 @@
-var forms = require('forms'),
+var express = require('express'),
+    forms = require('forms'),
     fields = forms.fields,
     validators = forms.validators,
     widgets = forms.widgets;
 
 /**
- * Initialize '/' route.
+ * Initializes route for the home page.
  *
- * @param {Object} app Express application object
+ * @param {Radio} radio An instance of Radio.
+ * @param {Radio} alarm An instance of AlarmClock.
+ * @returns {Object} Express application instance.
  */
-exports.init = function(app) {
+module.exports = function(radio, alarm) {
+    var app = express();
+
     // Build list of radio stations indexes
-    var radioStations = app.radio.getAvailableStations(),
+    var radioStations = radio.getAvailableStations(),
         radioStationChoices = [];
     for(var index in radioStations) {
         if (!radioStations.hasOwnProperty(index)) {
@@ -52,12 +57,12 @@ exports.init = function(app) {
     // Register routes
     app.get('/', function(req, res) {
         // Set default settings values and render the settings form
-        var alarmRingTime = app.alarm.getTime();
+        var alarmRingTime = alarm.getTime();
         var renderedSettingsForm = settingsForm.bind({
-            useAlarm: app.alarm.isRunning(),
+            useAlarm: alarm.isRunning(),
             wakeUpHour: alarmRingTime.hour.toString(),
             wakeUpMinute: alarmRingTime.minute.toString(),
-            radioStation: app.radio.getCurrentStation()
+            radioStation: radio.getCurrentStation()
         }).toHTML();
 
         // Add messages if needed
@@ -79,17 +84,17 @@ exports.init = function(app) {
         settingsForm.handle(req, {
             success: function (form) {
                 // Save settings
-                app.alarm.setTime(form.data.wakeUpHour, form.data.wakeUpMinute);
+                alarm.setTime(form.data.wakeUpHour, form.data.wakeUpMinute);
                 if (form.data.useAlarm) {
-                    if (!app.alarm.isRunning()) {
-                        app.alarm.run();
+                    if (!alarm.isRunning()) {
+                        alarm.run();
                     }
                 } else {
-                    if (app.alarm.isRunning()) {
-                        app.alarm.stop();
+                    if (alarm.isRunning()) {
+                        alarm.stop();
                     }
                 }
-                app.radio.setCurrentStation(form.data.radioStation);
+                radio.setCurrentStation(form.data.radioStation);
 
                 // Redirect a user to home page
                 res.redirect('/?saved');
@@ -99,4 +104,6 @@ exports.init = function(app) {
             }
         });
     });
+
+    return app;
 }

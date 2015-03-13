@@ -1,14 +1,21 @@
+var express = require('express');
+
 /**
- * Initialize '/stop' route.
+ * Initialize radio stop route.
  *
- * @param {Object} app Express application object
+ * @param {Radio} radio An instance of Radio.
+ * @returns {Object} Express application instance.
  */
-exports.init = function(app) {
+module.exports = function(radio) {
+    var app = express();
+
     app.get('/stop', function(req, res) {
         // Just stop the sound
-        app.radio.stop();
+        radio.stop();
 
         // Redirect a user to home page
         res.redirect('/');
     });
+
+    return app;
 }
