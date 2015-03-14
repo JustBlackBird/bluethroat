@@ -12,7 +12,7 @@ var bluethroatd = new Daemon({
     errorLog: config.errorLog || false,
     pid: config.pid || (process.cwd() + '/bluethroatd.pid'),
     uid: config.uid || process.getuid(),
-    gid: config.gid || process.getgid(),
+    gid: config.gid || process.getgid()
 });
 
 switch (process.argv[2]) {
