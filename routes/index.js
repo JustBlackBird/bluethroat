@@ -1,4 +1,4 @@
-var express = require('express'),
+var Router = require('express').Router,
     homeRoute = require('./home.js'),
     playRoute = require('./play.js'),
     stopRoute = require('./stop.js');
@@ -8,15 +8,15 @@ var express = require('express'),
  *
  * @param {Radio} radio An instance of Radio.
  * @param {Radio} alarm An instance of AlarmClock.
- * @returns {Object} Express application instance.
+ * @returns {Object} Express router instance.
  */
 module.exports = function(radio, alarm) {
-    var app = express();
+    var router = Router();
 
     // Initialize all routes, one by one
-    app.use(homeRoute(radio, alarm));
-    app.use(playRoute(radio));
-    app.use(stopRoute(radio));
+    router.use(homeRoute(radio, alarm));
+    router.use(playRoute(radio));
+    router.use(stopRoute(radio));
 
-    return app;
+    return router;
 }

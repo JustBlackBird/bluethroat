@@ -1,4 +1,4 @@
-var express = require('express'),
+var Router = require('express').Router,
     forms = require('forms'),
     fields = forms.fields,
     validators = forms.validators,
@@ -9,10 +9,10 @@ var express = require('express'),
  *
  * @param {Radio} radio An instance of Radio.
  * @param {Radio} alarm An instance of AlarmClock.
- * @returns {Object} Express application instance.
+ * @returns {Object} Express router instance.
  */
 module.exports = function(radio, alarm) {
-    var app = express();
+    var router = Router();
 
     // Build list of radio stations indexes
     var radioStations = radio.getAvailableStations(),
@@ -55,7 +55,7 @@ module.exports = function(radio, alarm) {
     });
 
     // Register routes
-    app.get('/', function(req, res) {
+    router.get('/', function(req, res) {
         // Set default settings values and render the settings form
         var alarmRingTime = alarm.getTime();
         var renderedSettingsForm = settingsForm.bind({
@@ -80,7 +80,7 @@ module.exports = function(radio, alarm) {
         );
     });
 
-    app.post('/', function(req, res) {
+    router.post('/', function(req, res) {
         settingsForm.handle(req, {
             success: function (form) {
                 // Save settings
@@ -105,5 +105,5 @@ module.exports = function(radio, alarm) {
         });
     });
 
-    return app;
+    return router;
 }

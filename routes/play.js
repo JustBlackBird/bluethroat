@@ -1,15 +1,15 @@
-var express = require('express');
+var Router = require('express').Router;
 
 /**
  * Initializes radio play route.
  *
  * @param {Radio} radio An instance of Radio.
- * @returns {Object} Express application instance.
+ * @returns {Object} Express router instance.
  */
 module.exports = function(radio) {
-    var app = express();
+    var router = Router();
 
-    app.get('/play', function(req, res, next) {
+    router.get('/play', function(req, res, next) {
         // Play currently selected radio station
         radio.play();
 
@@ -17,5 +17,5 @@ module.exports = function(radio) {
         res.redirect('/');
     });
 
-    return app;
+    return router;
 }
