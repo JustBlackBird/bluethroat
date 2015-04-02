@@ -4,51 +4,55 @@ var express = require('express'),
     middleware = require('./lib/middleware.js'),
     routes = require('./routes/index.js'),
     Radio = require('./lib/radio.js'),
+    MpdPool = require('./lib/mpd_pool.js'),
     AlarmClock = require('./lib/alarm_clock');
 
-// Initialize sound controller
-var radio = new Radio(
-    {
-        mpdHost: config.mpd.host,
-        mpdPort: config.mpd.port,
-        stations: config.radioStations,
-        defaultStation: config.defaultRadioStation
-    },
-    function() {
-        // Initialize entire application
-        var app = express();
+var mpdPool = new MpdPool({
+    host: config.mpd.host,
+    port: config.mpd.port,
+    reconnect: true,
+    timeout: 100
+});
 
-        // Initialize alarm clock
-        var alarm = new AlarmClock();
-        alarm.setTime(9, 45);
-        alarm.on('ring', function() {
-            if (!radio.isPlaying()) {
-                // Time to wake up. Turn on the radio
-                radio.fadeIn();
-            }
-        });
+var radio = new Radio(mpdPool, {
+    stations: config.radioStations,
+    defaultStation: config.defaultRadioStation
+});
 
-        // Use Handlebars template engine
-        app.set('view engine', 'handlebars');
-        app.engine('handlebars', require('hbs').__express);
+radio.on('ready', function() {
+    // Initialize entire application
+    var app = express();
 
-        // Serve static files
-        app.use(express.static(__dirname + '/public'));
+    // Initialize alarm clock
+    var alarm = new AlarmClock();
+    alarm.setTime(9, 45);
+    alarm.on('ring', function() {
+        if (!radio.isPlaying()) {
+            // Time to wake up. Turn on the radio
+            radio.fadeIn();
+        }
+    });
 
-        // Mount routes
-        app.use('/', routes(radio, alarm));
+    // Use Handlebars template engine
+    app.set('view engine', 'handlebars');
+    app.engine('handlebars', require('hbs').__express);
 
-        // Mount other middleware
-        app.use(middleware.notFound);
-        app.use(middleware.serverError);
+    // Serve static files
+    app.use(express.static(__dirname + '/public'));
 
-        // Initialize HTTP server
-        var appPort = config.server.port || 8000;
-        app.listen(
-            appPort,
-            function() {
-                console.log('Application is up on port ' + appPort.toString());
-            }
-        );
-    }
-);
+    // Mount routes
+    app.use('/', routes(radio, alarm));
+
+    // Mount other middleware
+    app.use(middleware.notFound);
+    app.use(middleware.serverError);
+
+    // Initialize HTTP server
+    var appPort = config.server.port || 8000;
+    app.listen(
+        appPort,
+        function() {
+            console.log('Application is up on port ' + appPort.toString());
+        }
+    );
+});
