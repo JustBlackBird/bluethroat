@@ -1,10 +1,10 @@
 // Require libs
 var express = require('express'),
-    config = require('./lib/config.js'),
-    middleware = require('./lib/middleware.js'),
-    routes = require('./routes/index.js'),
-    Radio = require('./lib/radio.js'),
-    MpdPool = require('./lib/mpd_pool.js'),
+    config = require('./lib/config'),
+    middleware = require('./lib/middleware'),
+    routes = require('./routes/index'),
+    Radio = require('./lib/radio'),
+    MpdPool = require('./lib/mpd_pool'),
     AlarmClock = require('./lib/alarm_clock');
 
 var mpdPool = new MpdPool({
