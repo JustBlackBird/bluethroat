@@ -9,8 +9,8 @@ DAEMON="/opt/bluethroat/bin/bluethroatd"
 # Provides: bluethroatd
 # Required-Start: $network $remote_fs $local_fs
 # Required-Stop: $network $remote_fs $local_fs
-# Should-Start: mpd
-# Should-Stop: mpd
+# Should-Start: mpd couchdb
+# Should-Stop: mpd couchdb
 # Default-Start: 2 3 4 5
 # Default-Stop: 0 1 6
 # Short-Description: start and stop bluethroatd
