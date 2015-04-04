@@ -5,13 +5,21 @@ Music alarm clock that helps to wake up in the mornings.
 ## Installation
 
 1. Install and configure [MPD](http://www.musicpd.org/)
+
 2. Install and configure [CouchDB](http://couchdb.apache.org/)
+
 3. Install required npm modules
-    ```$ npm install```
+    ```shell
+    npm install
+    ```
+
 4. Copy configs/default_config.json to configs/config.json and update the
 settings
+
 5. Run the application
-    ```$ ./bin/bluethroatd start```
+    ```shell
+    ./bin/bluethroatd start
+    ```
 
 ## Start with the system
 
