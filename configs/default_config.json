@@ -6,5 +6,8 @@
         "host": "localhost",
         "port": 6600
     },
+    "storage": {
+        "settings": "http://127.0.0.1:5984/bluethroat_settings"
+    },
     "radioStations": {}
 }

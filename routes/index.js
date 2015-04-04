@@ -8,13 +8,14 @@ var Router = require('express').Router,
  *
  * @param {Radio} radio An instance of Radio.
  * @param {Radio} alarm An instance of AlarmClock.
+ * @param {Settings} settings An instance of Settings.
  * @returns {Object} Express router instance.
  */
-module.exports = function(radio, alarm) {
+module.exports = function(radio, alarm, settings) {
     var router = Router();
 
     // Initialize all routes, one by one
-    router.use(homeRoute(radio, alarm));
+    router.use(homeRoute(radio, alarm, settings));
     router.use(playRoute(radio));
     router.use(stopRoute(radio));
 

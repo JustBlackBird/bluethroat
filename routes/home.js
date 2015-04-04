@@ -9,9 +9,10 @@ var Router = require('express').Router,
  *
  * @param {Radio} radio An instance of Radio.
  * @param {Radio} alarm An instance of AlarmClock.
+ * @param {Settings} settings An instance of Settings.
  * @returns {Object} Express router instance.
  */
-module.exports = function(radio, alarm) {
+module.exports = function(radio, alarm, settings) {
     var router = Router();
 
     // Build list of radio stations indexes
@@ -95,6 +96,15 @@ module.exports = function(radio, alarm) {
                     }
                 }
                 radio.setCurrentStation(form.data.radioStation);
+
+                // Update settings in the storage.
+                // TODO: Return response to the client only when the settings
+                // will be updated.
+                settings.set('alarm_enabled', form.data.useAlarm);
+                settings.set('alarm_time', {
+                    hour: form.data.wakeUpHour,
+                    minute: form.data.wakeUpMinute
+                });
 
                 // Redirect a user to home page
                 res.redirect('/?saved');
