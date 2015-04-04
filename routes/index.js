@@ -7,7 +7,7 @@ var Router = require('express').Router,
  * Initialize application's routes.
  *
  * @param {Radio} radio An instance of Radio.
- * @param {Radio} alarm An instance of AlarmClock.
+ * @param {AlarmClock} alarm An instance of AlarmClock.
  * @param {Settings} settings An instance of Settings.
  * @returns {Object} Express router instance.
  */
