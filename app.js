@@ -30,6 +30,14 @@ radio.on('ready', function() {
     // Initialize alarm clock
     var alarm = new AlarmClock();
 
+    // Actually the http server should be initialize AFTER all callbacks of
+    // "settings.get" method will be ran. This is not done in that way because
+    // of simplicity. In most cases it should not brings any problems because
+    // "settings.get" method is really fast and finishes before the HTTP server
+    // is up and running.
+    // TODO: Initialize HTTP server only when all "settings.get" callbacks will
+    // be ran.
+
     // Get the current alarm time from the storage.
     settings.get('alarm_time', function(error, time) {
         if (error) {
