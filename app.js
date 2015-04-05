@@ -77,11 +77,10 @@ radio.on('ready', function() {
     app.use(middleware.serverError);
 
     // Initialize HTTP server
-    var appPort = config.server.port || 8000;
     app.listen(
-        appPort,
+        config.server.port,
         function() {
-            console.log('Application is up on port ' + appPort.toString());
+            console.log('Application is up on port ' + config.server.port.toString());
         }
     );
 });
