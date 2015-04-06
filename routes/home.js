@@ -1,5 +1,6 @@
 var Router = require('express').Router,
     forms = require('forms'),
+    async = require('async'),
     fields = forms.fields,
     validators = forms.validators,
     widgets = forms.widgets;
@@ -97,17 +98,35 @@ module.exports = function(radio, alarm, settings) {
                 }
                 radio.setCurrentStation(form.data.radioStation);
 
-                // Update settings in the storage.
-                // TODO: Return response to the client only when the settings
-                // will be updated.
-                settings.set('alarm_enabled', form.data.useAlarm);
-                settings.set('alarm_time', {
-                    hour: form.data.wakeUpHour,
-                    minute: form.data.wakeUpMinute
+                // Prepare settings storage update tasks. They will be called in
+                // asynchronous manner later.
+                var tasks = [];
+
+                tasks.push(function(callback) {
+                    settings.set('alarm_enabled', form.data.useAlarm, callback);
                 });
 
-                // Redirect a user to home page
-                res.redirect('/?saved');
+                tasks.push(function(callback) {
+                    settings.set('alarm_time', {
+                        hour: form.data.wakeUpHour,
+                        minute: form.data.wakeUpMinute
+                    }, callback);
+                });
+
+                // Update settings in the storage.
+                async.parallel(tasks, function(error) {
+                    if (error) {
+                        // By some reason settings could not be updated in the
+                        // storage. Let the outer code know about it. This
+                        // exception will be caught by Express and passed to
+                        // error-processing middleware.
+                        throw error;
+                    }
+
+                    // Redirect a user to home page when all settings will be
+                    // updated.
+                    res.redirect('/?saved');
+                });
             },
             other: function (form) {
                 res.render('index', {settingsForm: form.toHTML()});
