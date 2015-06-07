@@ -1,6 +1,8 @@
 var Router = require('express').Router,
+    async = require('async'),
     forms = require('forms'),
     async = require('async'),
+    renderer = require('../lib/forms/renderer'),
     fields = forms.fields,
     validators = forms.validators,
     widgets = forms.widgets;
@@ -30,7 +32,10 @@ module.exports = function(radio, alarm, settings) {
     // Build settings form
     var settingsForm = forms.create({
         useAlarm: fields.boolean({
-            label: 'Alarm enabled'
+            label: 'Alarm enabled',
+            cssClasses: {
+                label: ['control-label']
+            }
         }),
         wakeUpHour: fields.number({
             required: true,
@@ -38,7 +43,10 @@ module.exports = function(radio, alarm, settings) {
             validators: [
                 validators.min(0),
                 validators.max(23)
-            ]
+            ],
+            cssClasses: {
+                label: ['control-label']
+            }
         }),
         wakeUpMinute: fields.number({
             required: true,
@@ -46,13 +54,19 @@ module.exports = function(radio, alarm, settings) {
             validators: [
                 validators.min(0),
                 validators.max(59)
-            ]
+            ],
+            cssClasses: {
+                label: ['control-label']
+            }
         }),
         radioStation: fields.array({
             required: true,
             label: 'Radio station:',
             choices: radioStationChoices,
-            widget: widgets.multipleRadio()
+            widget: widgets.select(),
+            cssClasses: {
+                label: ['control-label']
+            }
         })
     });
 
@@ -65,7 +79,7 @@ module.exports = function(radio, alarm, settings) {
             wakeUpHour: alarmRingTime.hour.toString(),
             wakeUpMinute: alarmRingTime.minute.toString(),
             radioStation: radio.getCurrentStation()
-        }).toHTML();
+        }).toHTML(renderer);
 
         // Add messages if needed
         var messages = [];
@@ -129,7 +143,7 @@ module.exports = function(radio, alarm, settings) {
                 });
             },
             other: function (form) {
-                res.render('index', {settingsForm: form.toHTML()});
+                res.render('index', {settingsForm: form.toHTML(renderer)});
             }
         });
     });
