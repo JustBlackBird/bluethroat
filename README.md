@@ -2,6 +2,8 @@
 
 Music alarm clock that helps to wake up in the mornings.
 
+The program is named after a little singing bird with a beautiful voice.
+
 ## Installation
 
 1. Install and configure [MPD](http://www.musicpd.org/)
