@@ -17,5 +17,8 @@
         "async": "^0.9.0",
         "forms": "^1.1.1",
         "bower": "^1.4.1"
+    },
+    "scripts": {
+        "bower-install": "./node_modules/.bin/bower install"
     }
 }

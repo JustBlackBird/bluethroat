@@ -13,10 +13,15 @@ Music alarm clock that helps to wake up in the mornings.
     npm install
     ```
 
-4. Copy configs/default_config.json to configs/config.json and update the
+4. Run Bower to install all third-party dependencies
+    ```shell
+    npm run bower-install
+    ```
+
+5. Copy configs/default_config.json to configs/config.json and update the
 settings
 
-5. Run the application
+6. Run the application
     ```shell
     ./bin/bluethroatd start
     ```
