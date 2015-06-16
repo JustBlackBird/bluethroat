@@ -39,4 +39,4 @@ to start with the system.
 
 ## Terms of Use
 
-Bluethroat is licensed under the terms of [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+Bluethroat is licensed under the terms of [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0). © Dmitriy Simushev
