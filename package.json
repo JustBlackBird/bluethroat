@@ -22,7 +22,7 @@
         "jshint": "^2.8.0"
     },
     "scripts": {
-        "bower-install": "./node_modules/.bin/bower install",
+        "bower-install": "node ./node_modules/.bin/bower install",
         "jshint": "node ./node_modules/.bin/jshint ./bin/bluethroatd ./lib"
     }
 }
