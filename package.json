@@ -19,10 +19,13 @@
         "bower": "^1.4.1"
     },
     "devDependencies": {
-        "jshint": "^2.8.0"
+        "jshint": "^2.8.0",
+        "should": "^7.0.1",
+        "mocha": "^2.2.5"
     },
     "scripts": {
         "bower-install": "node ./node_modules/.bin/bower install",
-        "jshint": "node ./node_modules/.bin/jshint ./bin/bluethroatd ./lib"
+        "jshint": "node ./node_modules/.bin/jshint ./bin/bluethroatd ./lib",
+        "tests": "./node_modules/.bin/mocha ./tests"
     }
 }
