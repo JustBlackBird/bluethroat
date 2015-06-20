@@ -1,5 +1,7 @@
 # Bluethroat
 
+[![Build Status](https://travis-ci.org/JustBlackBird/bluethroat.svg)](https://travis-ci.org/JustBlackBird/bluethroat)
+
 Music alarm clock that helps to wake up in the mornings.
 
 The program is named after a little singing bird with a beautiful voice.
