@@ -103,4 +103,36 @@ describe('AlarmClock', function() {
         });
     });
 
+    describe('alarm ringing', function() {
+        it('should emit "ring" event when the time is came', function(done) {
+            // We should wait until the clock is ring.
+            this.timeout(1500);
+
+            var alarm = new AlarmClock();
+
+            alarm.once('ring', function() {
+                true.should.be.true('the clock is rang');
+                done();
+            });
+
+            // If the current timestamp has more than 800 milliseconds we have
+            // to set second in the alarm clock to second after the next one.
+            // Otherwise just use the next second.
+            var d = new Date(),
+                second = d.getSeconds() + 1,
+                milliseconds = d.getMilliseconds();
+
+            if (milliseconds > 800) {
+                second += 1;
+            }
+
+            alarm.setTime(
+                d.getHours(),
+                d.getMinutes(),
+                second
+            );
+            alarm.run();
+        });
+    });
+
 });
