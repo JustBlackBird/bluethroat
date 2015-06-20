@@ -7,7 +7,7 @@ describe('AlarmClock', function() {
         var alarm = new AlarmClock();
 
         it('should remember time', function() {
-            alarm.setTime(9, 45);
+            alarm.setTime(9, 45, 18);
 
             var time = alarm.getTime();
 
@@ -16,6 +16,20 @@ describe('AlarmClock', function() {
 
             time.should.have.property('minute');
             time.minute.should.be.equal(45);
+
+            time.should.have.property('second');
+            time.second.should.be.equal(18);
+        });
+
+        it('should use default value for "second"', function() {
+            // Set time with seconds
+            alarm.setTime(11, 12, 13);
+            // Make sure the default values for second is used.
+            alarm.setTime(18, 30);
+
+            var time = alarm.getTime();
+            time.should.have.property('second');
+            time.second.should.be.equal(0);
         });
 
         it('should emit "setTime" event', function(done) {
