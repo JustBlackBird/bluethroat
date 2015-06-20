@@ -37,9 +37,9 @@ module.exports = function(radio, alarm, settings) {
                 label: ['control-label']
             }
         }),
-        wakeUpHour: fields.number({
+        wakeUpHours: fields.number({
             required: true,
-            label: 'Hour:',
+            label: 'Hours:',
             validators: [
                 validators.min(0),
                 validators.max(23)
@@ -48,9 +48,9 @@ module.exports = function(radio, alarm, settings) {
                 label: ['control-label']
             }
         }),
-        wakeUpMinute: fields.number({
+        wakeUpMinutes: fields.number({
             required: true,
-            label: 'Minute:',
+            label: 'Minutes:',
             validators: [
                 validators.min(0),
                 validators.max(59)
@@ -76,8 +76,8 @@ module.exports = function(radio, alarm, settings) {
         var alarmRingTime = alarm.getTime();
         var renderedSettingsForm = settingsForm.bind({
             useAlarm: alarm.isRunning(),
-            wakeUpHour: alarmRingTime.hour.toString(),
-            wakeUpMinute: alarmRingTime.minute.toString(),
+            wakeUpHours: alarmRingTime.hours.toString(),
+            wakeUpMinutes: alarmRingTime.minutes.toString(),
             radioStation: radio.getCurrentStation()
         }).toHTML(renderer);
 
@@ -100,7 +100,7 @@ module.exports = function(radio, alarm, settings) {
         settingsForm.handle(req, {
             success: function (form) {
                 // Save settings
-                alarm.setTime(form.data.wakeUpHour, form.data.wakeUpMinute);
+                alarm.setTime(form.data.wakeUpHours, form.data.wakeUpMinutes);
                 if (form.data.useAlarm) {
                     if (!alarm.isRunning()) {
                         alarm.run();
@@ -122,8 +122,8 @@ module.exports = function(radio, alarm, settings) {
 
                 tasks.push(function(callback) {
                     settings.set('alarm_time', {
-                        hour: form.data.wakeUpHour,
-                        minute: form.data.wakeUpMinute
+                        hours: form.data.wakeUpHours,
+                        minutes: form.data.wakeUpMinutes
                     }, callback);
                 });
 

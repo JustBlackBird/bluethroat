@@ -11,25 +11,25 @@ describe('AlarmClock', function() {
 
             var time = alarm.getTime();
 
-            time.should.have.property('hour');
-            time.hour.should.be.equal(9);
+            time.should.have.property('hours');
+            time.hours.should.be.equal(9);
 
-            time.should.have.property('minute');
-            time.minute.should.be.equal(45);
+            time.should.have.property('minutes');
+            time.minutes.should.be.equal(45);
 
-            time.should.have.property('second');
-            time.second.should.be.equal(18);
+            time.should.have.property('seconds');
+            time.seconds.should.be.equal(18);
         });
 
-        it('should use default value for "second"', function() {
+        it('should use default value for "seconds"', function() {
             // Set time with seconds
             alarm.setTime(11, 12, 13);
-            // Make sure the default values for second is used.
+            // Make sure the default values for seconds is used.
             alarm.setTime(18, 30);
 
             var time = alarm.getTime();
-            time.should.have.property('second');
-            time.second.should.be.equal(0);
+            time.should.have.property('seconds');
+            time.seconds.should.be.equal(0);
         });
 
         it('should emit "setTime" event', function(done) {
@@ -37,8 +37,8 @@ describe('AlarmClock', function() {
                 // Actually clock and alarm are the same objects
                 var time = clock.getTime();
 
-                time.hour.should.be.equal(8);
-                time.minute.should.be.equal(30);
+                time.hours.should.be.equal(8);
+                time.minutes.should.be.equal(30);
 
                 done();
             });
@@ -116,20 +116,20 @@ describe('AlarmClock', function() {
             });
 
             // If the current timestamp has more than 800 milliseconds we have
-            // to set second in the alarm clock to second after the next one.
-            // Otherwise just use the next second.
+            // to set seconds in the alarm clock to the second after the next
+            // one. Otherwise just use the next second.
             var d = new Date(),
-                second = d.getSeconds() + 1,
+                seconds = d.getSeconds() + 1,
                 milliseconds = d.getMilliseconds();
 
             if (milliseconds > 800) {
-                second += 1;
+                seconds += 1;
             }
 
             alarm.setTime(
                 d.getHours(),
                 d.getMinutes(),
-                second
+                seconds
             );
             alarm.run();
         });

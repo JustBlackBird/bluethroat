@@ -45,7 +45,7 @@ radio.on('ready', function() {
         }
 
         if (time) {
-            alarm.setTime(time.hour, time.minute);
+            alarm.setTime(time.hours, time.minutes);
         } else {
             // There is no alarm time stored. Use a default one.
             alarm.setTime(9, 45);
