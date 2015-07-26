@@ -1,4 +1,5 @@
 var should = require('should'),
+    sinon = require('sinon'),
     AlarmClock = require('../lib/alarm_clock');
 
 describe('AlarmClock', function() {
@@ -104,10 +105,17 @@ describe('AlarmClock', function() {
     });
 
     describe('alarm ringing', function() {
-        it('should emit "ring" event when the time is came', function(done) {
-            // We should wait until the clock is ring.
-            this.timeout(1500);
+        var clock;
 
+        beforeEach(function() {
+            clock = sinon.useFakeTimers((new Date()).getTime());
+        });
+
+        afterEach(function() {
+            clock.restore();
+        });
+
+        it('should emit "ring" event when the time is came', function(done) {
             var alarm = new AlarmClock();
 
             alarm.once('ring', function() {
@@ -115,23 +123,23 @@ describe('AlarmClock', function() {
                 done();
             });
 
-            // If the current timestamp has more than 800 milliseconds we have
-            // to set seconds in the alarm clock to the second after the next
-            // one. Otherwise just use the next second.
-            var d = new Date(),
-                seconds = d.getSeconds() + 1,
-                milliseconds = d.getMilliseconds();
+            // Scedule alarm clock ring after 3 hours 2 minutes and 1 second.
+            // Notice that the time should be in milliseconds so a thousand
+            // multiplier is used.
+            var offset = ((3 * 60 * 60) + (2 * 60) + 1) * 1000,
+                now = (new Date()).getTime(),
+                ringAt = new Date(now + offset);
 
-            if (milliseconds > 800) {
-                seconds += 1;
-            }
-
+            // Make the clock ring at the specified time.
             alarm.setTime(
-                d.getHours(),
-                d.getMinutes(),
-                seconds
+                ringAt.getHours(),
+                ringAt.getMinutes(),
+                ringAt.getSeconds()
             );
             alarm.run();
+
+            // Go to the future and check if the alarm clock is ringing or not.
+            clock.tick(offset);
         });
     });
 

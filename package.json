@@ -21,7 +21,8 @@
     "devDependencies": {
         "jshint": "^2.8.0",
         "should": "^7.0.1",
-        "mocha": "^2.2.5"
+        "mocha": "^2.2.5",
+        "sinon": "^1.15.4"
     },
     "scripts": {
         "bower-install": "./node_modules/.bin/bower install",
