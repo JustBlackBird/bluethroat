@@ -2,7 +2,8 @@
 
 var path = require('path'),
     Daemon = require('../lib/daemon.js'),
-    config = require('../lib/config.js').server || {};
+    ConfigLoader = require('../lib/config_loader.js'),
+    config = ConfigLoader.load(path.resolve(__dirname + '/../configs/config.json')).server;
 
 // Change working direcotry to the Application root.
 process.chdir(path.normalize(path.dirname(process.argv[1]) + '/../'));

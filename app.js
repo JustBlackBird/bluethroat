@@ -1,13 +1,16 @@
 // Require libs
-var express = require('express'),
+var path = require('path'),
+    express = require('express'),
     nano = require('nano'),
-    config = require('./lib/config'),
+    ConfigLoader = require('./lib/config_loader'),
     middleware = require('./lib/middleware'),
     routes = require('./routes/index'),
     Radio = require('./lib/radio'),
     MpdPool = require('./lib/mpd_pool'),
     AlarmClock = require('./lib/alarm_clock'),
     Settings = require('./lib/settings');
+
+var config = ConfigLoader.load(path.normalize(__dirname + '/configs/config.json'));
 
 var settings = new Settings(nano(config.storage.settings));
 
