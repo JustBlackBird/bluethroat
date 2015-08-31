@@ -11,7 +11,7 @@ module.exports = function(radio) {
 
     router.get('/play', function(req, res, next) {
         // Play currently selected radio station
-        radio.play(null, function(err) {
+        radio.play(function(err) {
             if (err) {
                 return next(err);
             }
