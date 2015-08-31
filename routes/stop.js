@@ -9,12 +9,16 @@ var Router = require('express').Router;
 module.exports = function(radio) {
     var router = Router();
 
-    router.get('/stop', function(req, res) {
+    router.get('/stop', function(req, res, next) {
         // Just stop the sound
-        radio.stop();
+        radio.stop(function(err) {
+            if (err) {
+                return next(err);
+            }
 
-        // Redirect a user to home page
-        res.redirect('/');
+            // Redirect a user to home page
+            res.redirect('/');
+        });
     });
 
     return router;

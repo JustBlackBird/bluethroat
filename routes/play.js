@@ -11,10 +11,14 @@ module.exports = function(radio) {
 
     router.get('/play', function(req, res, next) {
         // Play currently selected radio station
-        radio.play();
+        radio.play(null, function(err) {
+            if (err) {
+                return next(err);
+            }
 
-        // Redirect a user to home page
-        res.redirect('/');
+            // Redirect a user to home page
+            res.redirect('/');
+        });
     });
 
     return router;
