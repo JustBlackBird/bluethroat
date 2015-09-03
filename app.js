@@ -2,13 +2,15 @@
 var path = require('path'),
     express = require('express'),
     nano = require('nano'),
+    _ = require('underscore'),
     ConfigLoader = require('./lib/config_loader'),
     middleware = require('./lib/middleware'),
     routes = require('./routes/index'),
     Radio = require('./lib/radio'),
     MpdPool = require('./lib/mpd_pool'),
     AlarmClock = require('./lib/alarm_clock'),
-    Settings = require('./lib/settings');
+    Settings = require('./lib/settings'),
+    RadioStationsKeeper = require('./lib/radio_stations_keeper');
 
 var config = ConfigLoader.load(path.normalize(__dirname + '/configs/config.json'));
 
@@ -21,10 +23,11 @@ var mpdPool = new MpdPool({
     timeout: 100
 });
 
-var radio = new Radio(mpdPool, {
-    stations: config.radioStations,
-    defaultStation: config.defaultRadioStation
-});
+var stationsKeeper = new RadioStationsKeeper(config.radioStations);
+
+var radio = new Radio(mpdPool);
+
+radio.setCurrentStation(_.findWhere(config.radioStations, {id: config.defaultRadioStation}));
 
 radio.on('ready', function() {
     // Initialize entire application
@@ -81,7 +84,7 @@ radio.on('ready', function() {
     app.use(express.static(__dirname + '/public'));
 
     // Mount routes
-    app.use('/', routes(radio, alarm, settings));
+    app.use('/', routes(radio, stationsKeeper, alarm, settings));
 
     // Mount other middleware
     app.use(middleware.notFound);

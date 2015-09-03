@@ -12,20 +12,23 @@ var getCorrectConfig = function() {
             host: 'localhost',
             port: 6600
         },
-        radioStations: {
-            first: {
+        radioStations: [
+            {
+                id: "first",
                 name: 'The first',
                 url: 'http://example.com/first'
             },
-            second: {
+            {
+                id: "second",
                 name: 'The second',
                 url: 'http://example.com/second'
             },
-            third: {
+            {
+                id: "third",
                 name: 'The third',
                 url: 'http://example.com/third'
             }
-        },
+        ],
         defaultRadioStation: 'third',
         storage: {
             settings: "http://127.0.0.1:5984/bluethroat_settings"
@@ -186,7 +189,7 @@ describe('ConfigLoader', function() {
             var loadedConfig = ConfigLoader.load('configs/no-default-station.json');
 
             loadedConfig.should.have.property('defaultRadioStation');
-            loadedConfig.defaultRadioStation.should.be.equal(Object.keys(config.radioStations)[0]);
+            loadedConfig.defaultRadioStation.should.be.equal(config.radioStations[0].id);
 
             mockFs.restore();
         });
