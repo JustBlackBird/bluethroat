@@ -125,6 +125,19 @@ describe('RadioStationsKeeper', function() {
                 done();
             });
         });
+
+        it('should throw error for invalid station', function(done) {
+            var keeper = new RadioStationsKeeper(),
+                station = buildStation('foo');
+
+            delete station.id;
+
+            keeper.add(station, function(err) {
+                err.should.be.Error();
+
+                done();
+            });
+        });
     });
 
     describe('get', function() {
