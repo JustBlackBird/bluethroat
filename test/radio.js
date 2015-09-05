@@ -91,6 +91,14 @@ var getMpdClient = function() {
         done(null);
     };
 
+    // Make sure all events are emitted.
+    process.nextTick(function() {
+        client.emit('connect');
+        process.nextTick(function() {
+            client.emit('ready');
+        });
+    });
+
     return client;
 };
 
@@ -121,8 +129,8 @@ var getMpdPool = function(client) {
         return !!client;
     };
 
-    if (client) {
-        process.nextTick(function() {
+    if (client instanceof events.EventEmitter) {
+        client.on('connect', function() {
             pool.emit('connect', client);
         });
     }
