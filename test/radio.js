@@ -304,4 +304,98 @@ describe('Radio', function() {
             });
         });
     });
+
+    describe('fadeIn', function() {
+        it('should return error if no station was selected', function(done) {
+            var radio = new Radio(getMpdPool());
+
+            radio.fadeIn(150, function(err) {
+                err.should.be.Error();
+                err.message.should.be.equal('You should choose a station before play it.');
+
+                done();
+            });
+        });
+
+        it('should return error if too low duration is used', function(done) {
+            var radio = new Radio(getMpdPool());
+
+            radio.setCurrentStation(getRadioStation());
+            radio.fadeIn(50, function(err) {
+                err.should.be.Error();
+                err.message.should.be.equal('Duration must be greater than or equal to 100');
+
+                done();
+            });
+        });
+
+        it('should return error if MPD client cannot be got', function(done) {
+            var radio = new Radio(getMpdPool(null));
+
+            radio.setCurrentStation(getRadioStation());
+            radio.fadeIn(100, function(err) {
+                err.should.be.Error();
+                // This message is defined in MpdPool stub.
+                err.message.should.be.equal('The client is not specified');
+
+                done();
+            });
+        });
+
+        it('should return MPD client error "as is"', function(done) {
+            var client = getMpdClient();
+
+            // Make sure the client return error.
+            client.sendCommand = client.sendCommands = function(cmd, cb) {
+                cb(new Error('Test'));
+            };
+
+            var radio = new Radio(getMpdPool(client));
+
+            radio.setCurrentStation(getRadioStation());
+            radio.fadeIn(150, function(err) {
+                err.should.be.Error();
+                err.message.should.be.equal('Test');
+
+                done();
+            });
+        });
+
+        it('should send correct commands to MPD server', function(done) {
+            var client = getMpdClient(),
+                radio = new Radio(getMpdPool(client)),
+                station = getRadioStation();
+
+            radio.setCurrentStation(station);
+            radio.fadeIn(150, function(err) {
+                should(err).be.null();
+
+                var commands = client.getRecordedCommands();
+
+                commands.length.should.be.greaterThan(3);
+                // Turn of the volume first
+                commands[0].name.should.be.equal('setvol');
+                commands[0].args[0].should.be.equal(0);
+                // Play the station
+                commands[1].name.should.be.equal('add');
+                commands[1].args[0].should.be.equal(station.url);
+                commands[2].name.should.be.equal('play');
+
+                var currentVolume = 0,
+                    volCommands = commands.slice(3);
+
+                // Increase the volume to 100% step by step
+                for (var i = 0, l = volCommands.length; i < l; i++) {
+                    volCommands[i].name.should.be.equal('setvol');
+                    volCommands[i].args[0].should.be.greaterThan(currentVolume);
+                    currentVolume = volCommands[i].args[0];
+                }
+
+                // Make sure the volume now is 100%
+                currentVolume.should.be.equal(100);
+
+                done();
+            });
+        });
+    });
 });
