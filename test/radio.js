@@ -33,42 +33,6 @@ var getRadioStation = function() {
 };
 
 /**
- * Records all commands that are run with MPD client stub.
- *
- * Actually this is only a decorator for MPD client stub.
- *
- * @param {Object} client MPD client stub returned by "getMpdClient"
- * @returns {Object} Modified MPD client stub with additional
- * "getRecordedCommands" method.
- */
-var recordCommands = function(client) {
-    client._commands = [];
-
-    var sendCommand = client.sendCommand;
-    client.sendCommand = function(command, callback) {
-        client._commands.push(command);
-        // Run the original method.
-        sendCommand.call(this, command, callback);
-    };
-
-    var sendCommands = client.sendCommands;
-    client.sendCommands = function(commands, callback) {
-        commands.forEach(function(command) {
-            this._commands.push(command);
-        }, this);
-        // Run the original method
-        sendCommands.call(this, commands, callback);
-    };
-
-    // This is not a part of MpdClient and is used spy for commands calls.
-    client.getRecordedCommands = function() {
-        return this._commands;
-    };
-
-    return client;
-};
-
-/**
  * Builds a stub that mimics MpdClient behavior.
  *
  * The main purpose of this stub is to record commands that send to mpd.
@@ -79,16 +43,32 @@ var getMpdClient = function() {
     var noop = function() {},
         client = getEventEmitter();
 
+    // A storage for set commands.
+    client._commands = [];
+
     client.sendCommand = function(command, callback) {
         // Make sure stub works fine even if there is no callback specified
         var done = callback || noop;
+
+        client._commands.push(command);
+
         done(null);
     };
 
     client.sendCommands = function(commands, callback) {
         // Make sure stub works fine even if there is no callback specified
         var done = callback || noop;
+
+        commands.forEach(function(command) {
+            this._commands.push(command);
+        }, this);
+
         done(null);
+    };
+
+    // This is not a part of MpdClient and is used spy for commands calls.
+    client.getRecordedCommands = function() {
+        return this._commands;
     };
 
     // Make sure all events are emitted.
@@ -218,7 +198,7 @@ describe('Radio', function() {
         });
 
         it('should send "setvol", "add" and "play" commands to MPD server', function(done) {
-            var client = recordCommands(getMpdClient()),
+            var client = getMpdClient(),
                 station = getRadioStation(),
                 radio = new Radio(getMpdPool(client));
 
@@ -276,7 +256,7 @@ describe('Radio', function() {
 
     describe('stop', function() {
         it('should send "stop" and "clear" commands to MPD server', function(done) {
-            var client = recordCommands(getMpdClient()),
+            var client = getMpdClient(),
                 radio = new Radio(getMpdPool(client));
 
             radio.stop(function(err) {
