@@ -2,6 +2,7 @@ var util = require('util'),
     events = require('events'),
     should = require('should'),
     _ = require('underscore'),
+    async = require('async'),
     Radio = require('../lib/radio');
 
 /**
@@ -52,32 +53,33 @@ var getMpdClient = function() {
 
         client._commands.push(command);
 
-        done(null);
+        done(null, '');
     };
 
+    // This stub is just run "sendCommand" several times.
     client.sendCommands = function(commands, callback) {
         // Make sure stub works fine even if there is no callback specified
         var done = callback || noop;
 
-        commands.forEach(function(command) {
-            this._commands.push(command);
-        }, this);
+        var combinedResponse = '';
+        async.eachSeries(commands, function(command, next) {
+            client.sendCommand(command, function(err, response) {
+                combinedResponse += (response || '');
+                next(err);
+            });
+        }, function(err) {
+            if (err) {
+                return done(err);
+            }
 
-        done(null);
+            done(null, combinedResponse);
+        });
     };
 
     // This is not a part of MpdClient and is used spy for commands calls.
     client.getRecordedCommands = function() {
         return this._commands;
     };
-
-    // Make sure all events are emitted.
-    process.nextTick(function() {
-        client.emit('connect');
-        process.nextTick(function() {
-            client.emit('ready');
-        });
-    });
 
     return client;
 };
@@ -108,12 +110,6 @@ var getMpdPool = function(client) {
     pool.isConnected = function() {
         return !!client;
     };
-
-    if (client instanceof events.EventEmitter) {
-        client.on('connect', function() {
-            pool.emit('connect', client);
-        });
-    }
 
     return pool;
 };
@@ -224,7 +220,7 @@ describe('Radio', function() {
             var client = getMpdClient();
 
             // Make sure client return an error
-            client.sendCommands = client.sendCommand = function(cmd, callback) {
+            client.sendCommand = function(cmd, callback) {
                 callback(new Error('Test'));
             };
 
@@ -275,7 +271,7 @@ describe('Radio', function() {
             var client = getMpdClient();
 
             // Make sure client return an error
-            client.sendCommands = client.sendCommand = function(cmd, callback) {
+            client.sendCommand = function(cmd, callback) {
                 callback(new Error('Test'));
             };
 
@@ -346,7 +342,7 @@ describe('Radio', function() {
             var client = getMpdClient();
 
             // Make sure the client return error.
-            client.sendCommand = client.sendCommands = function(cmd, cb) {
+            client.sendCommands = function(cmd, cb) {
                 cb(new Error('Test'));
             };
 
