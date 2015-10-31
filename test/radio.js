@@ -52,11 +52,19 @@ var getMpdClient = function() {
         state: 'stop'
     };
 
+    // This is an Error wich should be returned any time a command is sent.
+    // false means no error should be returned.
+    client._error = false;
+
     client.sendCommand = function(command, callback) {
         // Make sure stub works fine even if there is no callback specified
         var done = callback || noop;
 
         client._commands.push(command);
+
+        if (client._error) {
+            return callback(client._error);
+        }
 
         var response = '';
         if (command.name === 'status') {
@@ -97,6 +105,12 @@ var getMpdClient = function() {
     // client's status.
     client.setInternalStatus = function(status) {
         client._status = status;
+    };
+
+    // This is not a part of MpdClient API and is used to return a error for
+    // commands.
+    client.setInternalError = function(err) {
+        client._error = err;
     };
 
     return client;
@@ -235,17 +249,13 @@ describe('Radio', function() {
         });
 
         it('should return MPD client error "as is"', function(done) {
-            var client = getMpdClient();
+            var client = getMpdClient(),
+                radio = new Radio(getMpdPool(client));
 
             // Make sure client return an error
-            client.sendCommand = function(cmd, callback) {
-                callback(new Error('Test'));
-            };
+            client.setInternalError(Error('Test'));
 
-            var radio = new Radio(getMpdPool(client)),
-                station = getRadioStation();
-
-            radio.setCurrentStation(station);
+            radio.setCurrentStation(getRadioStation());
             radio.play(function(err) {
                 err.should.be.Error();
                 err.message.should.be.equal('Test');
@@ -286,17 +296,12 @@ describe('Radio', function() {
         });
 
         it('should return MPD client error "as is"', function(done) {
-            var client = getMpdClient();
+            var client = getMpdClient(),
+                radio = new Radio(getMpdPool(client));
 
             // Make sure client return an error
-            client.sendCommand = function(cmd, callback) {
-                callback(new Error('Test'));
-            };
+            client.setInternalError(new Error('Test'));
 
-            var radio = new Radio(getMpdPool(client)),
-                station = getRadioStation();
-
-            radio.setCurrentStation(station);
             radio.stop(function(err) {
                 err.should.be.Error();
                 err.message.should.be.equal('Test');
@@ -308,7 +313,6 @@ describe('Radio', function() {
         it('should return error if MPD client cannot be got', function(done) {
             var radio = new Radio(getMpdPool(null));
 
-            radio.setCurrentStation(getRadioStation());
             radio.stop(function(err) {
                 err.should.be.Error();
                 // This message is defined in MpdPool stub.
@@ -357,14 +361,11 @@ describe('Radio', function() {
         });
 
         it('should return MPD client error "as is"', function(done) {
-            var client = getMpdClient();
+            var client = getMpdClient(),
+                radio = new Radio(getMpdPool(client));
 
             // Make sure the client return error.
-            client.sendCommands = function(cmd, cb) {
-                cb(new Error('Test'));
-            };
-
-            var radio = new Radio(getMpdPool(client));
+            client.setInternalError(new Error('Test'));
 
             radio.setCurrentStation(getRadioStation());
             radio.fadeIn(150, function(err) {
@@ -415,14 +416,11 @@ describe('Radio', function() {
 
     describe('isPlaying', function() {
         it('should return MPD client error "as is"', function(done) {
-            var client = getMpdClient();
+            var client = getMpdClient(),
+                radio = new Radio(getMpdPool(client));
 
             // Make sure client return an error
-            client.sendCommand = function(cmd, callback) {
-                callback(new Error('Test'));
-            };
-
-            var radio = new Radio(getMpdPool(client));
+            client.setInternalError(new Error('Test'));
 
             radio.isPlaying(function(err) {
                 err.should.be.Error();
