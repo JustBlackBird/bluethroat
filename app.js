@@ -2,7 +2,7 @@
 var path = require('path'),
     express = require('express'),
     nano = require('nano'),
-    _ = require('underscore'),
+    _ = require('lodash'),
     ConfigLoader = require('./lib/config_loader'),
     middleware = require('./lib/middleware'),
     routes = require('./routes/index'),
@@ -27,7 +27,9 @@ var stationsKeeper = new RadioStationsKeeper(config.radioStations);
 
 var radio = new Radio(mpdPool);
 
-radio.setCurrentStation(_.findWhere(config.radioStations, {id: config.defaultRadioStation}));
+radio.setCurrentStation(_.find(config.radioStations, function(station) {
+    return station.id === config.defaultRadioStation;
+}));
 
 // Initialize entire application
 var app = express();

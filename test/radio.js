@@ -1,7 +1,7 @@
 var util = require('util'),
     events = require('events'),
     should = require('should'),
-    _ = require('underscore'),
+    _ = require('lodash'),
     async = require('async'),
     Radio = require('../lib/radio');
 

@@ -1,6 +1,6 @@
 var util = require('util'),
     should = require('should'),
-    _ = require('underscore'),
+    _ = require('lodash'),
     RadioStationsKeeper = require('../lib/radio_stations_keeper');
 
 /**
@@ -195,8 +195,12 @@ describe('RadioStationsKeeper', function() {
                 stations.length.should.be.equal(2);
 
                 // Check that the stations exists
-                var foo = _.findWhere(stations, {id: 'foo'});
-                var bar = _.findWhere(stations, {id: 'bar'});
+                var foo = _.find(stations, function(station) {
+                    return station.id === 'foo';
+                });
+                var bar = _.find(stations, function(station) {
+                    return station.id === 'bar';
+                });
 
                 foo.should.be.ok();
                 bar.should.be.ok();
