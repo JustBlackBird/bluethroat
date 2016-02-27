@@ -9,21 +9,21 @@
         "email": "simushevds@gmail.com"
     },
     "dependencies": {
-        "express": "^4.13.3",
-        "hbs": "^3.1.1",
-        "nano": "^6.1.5",
+        "express": "^4.13.4",
+        "hbs": "^4.0.0",
+        "nano": "^6.2.0",
         "mpd": "^1.3.0",
         "underscore": "^1.8.3",
-        "async": "^1.4.2",
-        "forms": "^1.1.3",
-        "bower": "^1.5.2"
+        "async": "^1.5.2",
+        "forms": "^1.1.4",
+        "bower": "^1.7.7"
     },
     "devDependencies": {
-        "jshint": "^2.8.0",
-        "should": "^7.1.0",
-        "mocha": "^2.3.2",
-        "sinon": "^1.16.1",
-        "mock-fs": "^3.2.0"
+        "jshint": "^2.9.1",
+        "should": "^8.2.2",
+        "mocha": "^2.4.5",
+        "sinon": "^1.17.3",
+        "mock-fs": "^3.7.0"
     },
     "scripts": {
         "bower-install": "./node_modules/.bin/bower install",
