@@ -17,9 +17,9 @@ The program is named after a little singing bird with a beautiful voice.
     npm install
     ```
 
-4. Run Bower to install all third-party dependencies
+4. Run Gulp to build the project (notice you need to install Gulp globaly if you don't have it yet)
     ```shell
-    npm run bower-install
+    gulp default
     ```
 
 5. Copy configs/default_config.json to configs/config.json and update the

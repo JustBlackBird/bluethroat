@@ -10,7 +10,6 @@
     },
     "dependencies": {
         "async": "^1.5.2",
-        "bower": "^1.7.7",
         "express": "^4.13.4",
         "forms": "^1.1.4",
         "hbs": "^4.0.0",
@@ -19,14 +18,15 @@
         "nano": "^6.2.0"
     },
     "devDependencies": {
+        "bower": "^1.7.7",
+        "gulp": "^3.9.1",
         "jshint": "^2.9.1",
-        "should": "^8.2.2",
         "mocha": "^2.4.5",
-        "sinon": "^1.17.3",
-        "mock-fs": "^3.7.0"
+        "mock-fs": "^3.7.0",
+        "should": "^8.2.2",
+        "sinon": "^1.17.3"
     },
     "scripts": {
-        "bower-install": "./node_modules/.bin/bower install",
         "jshint": "./node_modules/.bin/jshint ./bin/bluethroatd ./lib",
         "test": "./node_modules/.bin/mocha ./test/*.js"
     }
