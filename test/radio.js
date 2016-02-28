@@ -225,7 +225,7 @@ describe('Radio', function() {
             });
         });
 
-        it('should send "setvol", "add" and "play" commands to MPD server', function(done) {
+        it('should send "clear", "setvol", "add" and "play" commands to MPD server', function(done) {
             var client = getMpdClient(),
                 station = getRadioStation(),
                 radio = new Radio(getMpdPool(client));
@@ -237,12 +237,13 @@ describe('Radio', function() {
 
                 // Make sure the commands are in the correct order and have
                 // correct arguments.
-                commands.length.should.be.equal(3);
-                commands[0].name.should.be.equal('setvol');
-                commands[0].args[0].should.be.equal(100);
-                commands[1].name.should.be.equal('add');
-                commands[1].args[0].should.be.equal(station.url);
-                commands[2].name.should.be.equal('play');
+                commands.length.should.be.equal(4);
+                commands[0].name.should.be.equal('clear');
+                commands[1].name.should.be.equal('setvol');
+                commands[1].args[0].should.be.equal(100);
+                commands[2].name.should.be.equal('add');
+                commands[2].args[0].should.be.equal(station.url);
+                commands[3].name.should.be.equal('play');
 
                 done();
             });
