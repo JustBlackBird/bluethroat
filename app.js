@@ -10,91 +10,55 @@ var path = require('path'),
     MpdPool = require('./lib/mpd_pool'),
     AlarmClock = require('./lib/alarm_clock'),
     Settings = require('./lib/settings'),
-    RadioStationsKeeper = require('./lib/radio_stations_keeper');
+    RadioStationsKeeper = require('./lib/radio_stations_keeper'),
+    Application = require('./lib/application');
 
 var config = ConfigLoader.load(path.normalize(__dirname + '/configs/config.json'));
 
-var settings = new Settings(nano(config.storage.settings));
-
-var mpdPool = new MpdPool({
-    host: config.mpd.host,
-    port: config.mpd.port,
-    reconnect: true,
-    timeout: 100
-});
-
-var stationsKeeper = new RadioStationsKeeper(config.radioStations);
-
-var radio = new Radio(mpdPool);
+var settings = new Settings(nano(config.storage.settings)),
+    stationsKeeper = new RadioStationsKeeper(config.radioStations),
+    alarm = new AlarmClock(),
+    mpdPool = new MpdPool({
+        host: config.mpd.host,
+        port: config.mpd.port,
+        reconnect: true,
+        timeout: 100
+    }),
+    radio = new Radio(mpdPool);
 
 radio.setCurrentStation(_.find(config.radioStations, function(station) {
     return station.id === config.defaultRadioStation;
 }));
 
-// Initialize entire application
-var app = express();
+var app = new Application(radio, stationsKeeper, alarm, settings);
 
-// Initialize alarm clock
-var alarm = new AlarmClock();
-
-// Actually the http server should be initialize AFTER all callbacks of
-// "settings.get" method will be ran. This is not done in that way because
-// of simplicity. In most cases it should not brings any problems because
-// "settings.get" method is really fast and finishes before the HTTP server
-// is up and running.
-// TODO: Initialize HTTP server only when all "settings.get" callbacks will
-// be ran.
-
-// Get the current alarm time from the storage.
-settings.get('alarm_time', function(error, time) {
-    if (error) {
-        throw error;
+app.run(function(err) {
+    if (err) {
+        throw err;
     }
 
-    if (time) {
-        alarm.setTime(time.hours, time.minutes);
-    } else {
-        // There is no alarm time stored. Use a default one.
-        alarm.setTime(9, 45);
-    }
+    // Initialize entire server application.
+    var server = express();
+
+    // Use Handlebars template engine.
+    server.set('view engine', 'handlebars');
+    server.engine('handlebars', require('hbs').__express);
+
+    // Serve static files.
+    server.use(express.static(__dirname + '/public'));
+
+    // Mount routes.
+    server.use('/', routes(radio, stationsKeeper, alarm, settings));
+
+    // Mount other middleware.
+    server.use(middleware.notFound);
+    server.use(middleware.serverError);
+
+    // Connect HTTP server.
+    server.listen(
+        config.server.port,
+        function() {
+            console.log('Application is up on port ' + config.server.port.toString());
+        }
+    );
 });
-
-// Get the current state of alarm clock.
-settings.get('alarm_enabled', function(error, isEnabled) {
-    if (error) {
-        throw error;
-    }
-
-    if (isEnabled) {
-        alarm.run();
-    }
-});
-
-alarm.on('ring', function() {
-    if (!radio.isPlaying()) {
-        // Time to wake up. Turn on the radio
-        radio.fadeIn();
-    }
-});
-
-// Use Handlebars template engine
-app.set('view engine', 'handlebars');
-app.engine('handlebars', require('hbs').__express);
-
-// Serve static files
-app.use(express.static(__dirname + '/public'));
-
-// Mount routes
-app.use('/', routes(radio, stationsKeeper, alarm, settings));
-
-// Mount other middleware
-app.use(middleware.notFound);
-app.use(middleware.serverError);
-
-// Initialize HTTP server
-app.listen(
-    config.server.port,
-    function() {
-        console.log('Application is up on port ' + config.server.port.toString());
-    }
-);
