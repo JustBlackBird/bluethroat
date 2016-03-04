@@ -1,25 +1,19 @@
 var Router = require('express').Router,
-    homeRoute = require('./home.js'),
-    playRoute = require('./play.js'),
-    stopRoute = require('./stop.js');
+    homeRouter = require('./home.js'),
+    apiRouter = require('./api');
 
 /**
  * Initialize application's routes.
  *
- * @param {Radio} radio An instance of Radio.
- * @param {AlarmClock} alarm An instance of AlarmClock.
- * @param {RadioStationsKeeper} stationsKeeper An instance of
- * RadioStationsKeeper.
- * @param {Settings} settings An instance of Settings.
+ * @param {Application} app Server side application instance.
  * @returns {Object} Express router instance.
  */
-module.exports = function(radio, stationsKeeper, alarm, settings) {
+module.exports = function(app) {
     var router = Router();
 
     // Initialize all routes, one by one
-    router.use(homeRoute(radio, stationsKeeper, alarm, settings));
-    router.use(playRoute(radio));
-    router.use(stopRoute(radio));
+    router.use('/', homeRouter(app));
+    router.use('/api', apiRouter(app));
 
     return router;
-}
+};

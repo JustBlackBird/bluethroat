@@ -6,3 +6,6 @@ configs/config.json
 
 # Ignore third-party client-side dependencies
 public/third-party
+
+# Ignore built client-side application
+public/application.js

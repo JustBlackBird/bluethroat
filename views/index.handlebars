@@ -1,23 +1,10 @@
 
-<h2>Sound control</h2>
+<div id="application-container"></div>
 
-<div class="controls">
-    <a href="/play" class="btn btn-default">
-        <span class="glyphicon glyphicon-play" aria-hidden="true"></span> Play
-    </a>
-    <a href="/stop" class="btn btn-default">
-        <span class="glyphicon glyphicon-stop" aria-hidden="true"></span> Stop
-    </a>
-</div>
-
-<h2>Settings</h2>
-
-<div class="settings-form">
-    <form action="/" method="post">
-        {{{settingsForm}}}
-
-        <div class="field">
-            <input type="submit" value="Save" class="btn btn-primary"/>
-        </div>
-    </form>
-</div>
+<script src="/application.js"></script>
+<script type="text/javascript">
+    Application(
+        {{{applicationState}}},
+        document.getElementById('application-container')
+    );
+</script>

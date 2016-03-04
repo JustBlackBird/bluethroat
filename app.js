@@ -48,7 +48,7 @@ app.run(function(err) {
     server.use(express.static(__dirname + '/public'));
 
     // Mount routes.
-    server.use('/', routes(radio, stationsKeeper, alarm, settings));
+    server.use('/', routes(app));
 
     // Mount other middleware.
     server.use(middleware.notFound);
