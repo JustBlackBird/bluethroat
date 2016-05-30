@@ -40,7 +40,7 @@
         "vinyl-source-stream": "^1.1.0"
     },
     "scripts": {
-        "jshint": "./node_modules/.bin/jshint ./bin/bluethroatd ./lib",
-        "test": "./node_modules/.bin/mocha ./test/*.js"
+        "jshint": "jshint ./bin/bluethroatd ./lib",
+        "test": "mocha ./test/*.js"
     }
 }
