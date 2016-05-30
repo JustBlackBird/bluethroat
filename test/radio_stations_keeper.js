@@ -52,16 +52,14 @@ describe('RadioStationsKeeper', function() {
                 buildStation('bar')
             ]);
 
-            keeper.has('foo', function(err, exists) {
-                should(err).be.null();
+            keeper.has('foo').then(function(exists) {
                 exists.should.be.true();
 
-                keeper.has('bar', function(err, exists) {
-                    should(err).be.null();
-                    exists.should.be.true();
+                return keeper.has('bar');
+            }).then(function(exists) {
+                exists.should.be.true();
 
-                    done();
-                });
+                done();
             });
         });
     });
@@ -72,8 +70,7 @@ describe('RadioStationsKeeper', function() {
                 buildStation('foo')
             ]);
 
-            keeper.has('foo', function(err, exists) {
-                should(err).be.null();
+            keeper.has('foo').then(function(exists) {
                 exists.should.be.true();
 
                 done();
@@ -83,8 +80,7 @@ describe('RadioStationsKeeper', function() {
         it('should return false for missed stations', function(done) {
             var keeper = new RadioStationsKeeper();
 
-            keeper.has('foo', function(err, exists) {
-                should(err).be.null();
+            keeper.has('foo').then(function(exists) {
                 exists.should.be.false();
 
                 done();
@@ -96,20 +92,16 @@ describe('RadioStationsKeeper', function() {
         it('should store added station', function(done) {
             var keeper = new RadioStationsKeeper();
 
-            keeper.has('foo', function(err, exists) {
-                should(err).be.null();
+            keeper.has('foo').then(function(exists) {
                 exists.should.be.false();
 
-                keeper.add(buildStation('foo'), function(err) {
-                    should(err).be.null();
+                return keeper.add(buildStation('foo'));
+            }).then(function() {
+                return keeper.has('foo');
+            }).then(function(exists) {
+                exists.should.be.true();
 
-                    keeper.has('foo', function(err, exists) {
-                        should(err).be.null();
-                        exists.should.be.true();
-
-                        done();
-                    });
-                });
+                done();
             });
         });
 
@@ -118,7 +110,7 @@ describe('RadioStationsKeeper', function() {
                 buildStation('foo')
             ]);
 
-            keeper.add(buildStation('foo'), function(err) {
+            keeper.add(buildStation('foo')).catch(function(err) {
                 err.should.be.Error();
                 err.message.should.be.equal('Station "foo" already exists.');
 
@@ -132,7 +124,7 @@ describe('RadioStationsKeeper', function() {
 
             delete station.id;
 
-            keeper.add(station, function(err) {
+            keeper.add(station).catch(function(err) {
                 err.should.be.Error();
 
                 done();
@@ -144,25 +136,20 @@ describe('RadioStationsKeeper', function() {
         it('should return added stations with same fields', function(done) {
             var keeper = new RadioStationsKeeper();
 
-            keeper.add(buildStation('foo'), function(err) {
-                should(err).be.null();
+            keeper.add(buildStation('foo')).then(function() {
+                return keeper.get('foo');
+            }).then(function(station) {
+                // Make sure retrieved station is correct
+                validateStation(station, buildStation('foo'));
 
-                keeper.get('foo', function(err, station) {
-                    should(err).be.null();
-
-                    // Make sure retrieved station is correct
-                    validateStation(station, buildStation('foo'));
-
-                    done();
-                });
+                done();
             });
         });
 
         it('should return false if there is no such station', function(done) {
             var keeper = new RadioStationsKeeper();
 
-            keeper.get('foo', function(err, station) {
-                should(err).be.null();
+            keeper.get('foo').then(function(station) {
                 station.should.be.false();
 
                 done();
@@ -174,8 +161,7 @@ describe('RadioStationsKeeper', function() {
         it('should return empty array if there are no stations', function(done) {
             var keeper = new RadioStationsKeeper();
 
-            keeper.all(function(err, stations) {
-                should(err).be.null();
+            keeper.all().then(function(stations) {
                 stations.should.be.Array();
                 stations.length.should.be.equal(0);
 
@@ -189,8 +175,7 @@ describe('RadioStationsKeeper', function() {
                 buildStation('bar')
             ]);
 
-            keeper.all(function(err, stations) {
-                should(err).be.null();
+            keeper.all().then(function(stations) {
                 stations.should.be.Array();
                 stations.length.should.be.equal(2);
 

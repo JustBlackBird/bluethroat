@@ -32,33 +32,40 @@ radio.setCurrentStation(_.find(config.radioStations, function(station) {
 
 var app = new Application(radio, stationsKeeper, alarm, settings);
 
-app.run(function(err) {
-    if (err) {
-        throw err;
-    }
+app.run().then(function() {
+    return new Promise(function(resolve, reject) {
+        // Initialize entire server application.
+        var server = express();
 
-    // Initialize entire server application.
-    var server = express();
+        // Use Handlebars template engine.
+        server.set('view engine', 'handlebars');
+        server.engine('handlebars', require('hbs').__express);
 
-    // Use Handlebars template engine.
-    server.set('view engine', 'handlebars');
-    server.engine('handlebars', require('hbs').__express);
+        // Serve static files.
+        server.use(express.static(__dirname + '/public'));
 
-    // Serve static files.
-    server.use(express.static(__dirname + '/public'));
+        // Mount routes.
+        server.use('/', routes(app));
 
-    // Mount routes.
-    server.use('/', routes(app));
+        // Mount other middleware.
+        server.use(middleware.notFound);
+        server.use(middleware.serverError);
 
-    // Mount other middleware.
-    server.use(middleware.notFound);
-    server.use(middleware.serverError);
-
-    // Connect HTTP server.
-    server.listen(
-        config.server.port,
-        function() {
-            console.log('Application is up on port ' + config.server.port.toString());
-        }
-    );
+        // Connect HTTP server.
+        server.listen(
+            config.server.port,
+            function(err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            }
+        );
+    });
+}).then(function() {
+    console.log('Application is up on port ' + config.server.port.toString());
+}).catch(function(err) {
+    console.error(err);
+    process.exit();
 });

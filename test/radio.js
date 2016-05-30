@@ -2,6 +2,7 @@ var util = require('util'),
     events = require('events'),
     should = require('should'),
     _ = require('lodash'),
+    Promise = require('bluebird'),
     async = require('async'),
     Radio = require('../lib/radio');
 
@@ -131,11 +132,11 @@ var getMpdPool = function(client) {
     }
 
     // Define API methods to mimic real MpdPool instance.
-    pool.getClient = function(callback) {
+    pool.getClient = function() {
         if (client) {
-            return callback(null, client);
+            return Promise.resolve(client);
         } else {
-            return callback(new Error('The client is not specified'));
+            return Promise.reject(new Error('The client is not specified'));
         }
     };
 
@@ -217,7 +218,7 @@ describe('Radio', function() {
     describe('play', function() {
         it('should return error if no station is selected', function(done) {
             var radio = new Radio(getMpdPool());
-            radio.play(function(err) {
+            radio.play().catch(function(err) {
                 err.should.be.Error();
                 err.message.should.be.equal('You should choose a station before play it.');
 
@@ -231,8 +232,7 @@ describe('Radio', function() {
                 radio = new Radio(getMpdPool(client));
 
             radio.setCurrentStation(station);
-            radio.play(function(err) {
-                should(err).be.null();
+            radio.play().then(function() {
                 var commands = client.getRecordedCommands();
 
                 // Make sure the commands are in the correct order and have
@@ -257,7 +257,7 @@ describe('Radio', function() {
             client.setInternalError(Error('Test'));
 
             radio.setCurrentStation(getRadioStation());
-            radio.play(function(err) {
+            radio.play().catch(function(err) {
                 err.should.be.Error();
                 err.message.should.be.equal('Test');
 
@@ -269,7 +269,7 @@ describe('Radio', function() {
             var radio = new Radio(getMpdPool(null));
 
             radio.setCurrentStation(getRadioStation());
-            radio.play(function(err) {
+            radio.play().catch(function(err) {
                 err.should.be.Error();
                 // This message is defined in MpdPool stub.
                 err.message.should.be.equal('The client is not specified');
@@ -284,9 +284,7 @@ describe('Radio', function() {
             var client = getMpdClient(),
                 radio = new Radio(getMpdPool(client));
 
-            radio.stop(function(err) {
-                should(err).be.null();
-
+            radio.stop().then(function() {
                 var commands = client.getRecordedCommands();
                 commands.length.should.be.equal(2);
                 commands[0].name.should.be.equal('stop');
@@ -303,7 +301,7 @@ describe('Radio', function() {
             // Make sure client return an error
             client.setInternalError(new Error('Test'));
 
-            radio.stop(function(err) {
+            radio.stop().catch(function(err) {
                 err.should.be.Error();
                 err.message.should.be.equal('Test');
 
@@ -314,7 +312,7 @@ describe('Radio', function() {
         it('should return error if MPD client cannot be got', function(done) {
             var radio = new Radio(getMpdPool(null));
 
-            radio.stop(function(err) {
+            radio.stop().catch(function(err) {
                 err.should.be.Error();
                 // This message is defined in MpdPool stub.
                 err.message.should.be.equal('The client is not specified');
@@ -328,7 +326,7 @@ describe('Radio', function() {
         it('should return error if no station was selected', function(done) {
             var radio = new Radio(getMpdPool());
 
-            radio.fadeIn(150, function(err) {
+            radio.fadeIn(150).catch(function(err) {
                 err.should.be.Error();
                 err.message.should.be.equal('You should choose a station before play it.');
 
@@ -340,7 +338,7 @@ describe('Radio', function() {
             var radio = new Radio(getMpdPool());
 
             radio.setCurrentStation(getRadioStation());
-            radio.fadeIn(50, function(err) {
+            radio.fadeIn(50).catch(function(err) {
                 err.should.be.Error();
                 err.message.should.be.equal('Duration must be greater than or equal to 100');
 
@@ -352,7 +350,7 @@ describe('Radio', function() {
             var radio = new Radio(getMpdPool(null));
 
             radio.setCurrentStation(getRadioStation());
-            radio.fadeIn(100, function(err) {
+            radio.fadeIn(100).catch(function(err) {
                 err.should.be.Error();
                 // This message is defined in MpdPool stub.
                 err.message.should.be.equal('The client is not specified');
@@ -369,7 +367,7 @@ describe('Radio', function() {
             client.setInternalError(new Error('Test'));
 
             radio.setCurrentStation(getRadioStation());
-            radio.fadeIn(150, function(err) {
+            radio.fadeIn(150).catch(function(err) {
                 err.should.be.Error();
                 err.message.should.be.equal('Test');
 
@@ -383,9 +381,7 @@ describe('Radio', function() {
                 station = getRadioStation();
 
             radio.setCurrentStation(station);
-            radio.fadeIn(150, function(err) {
-                should(err).be.null();
-
+            radio.fadeIn(150).then(function() {
                 var commands = client.getRecordedCommands();
 
                 commands.length.should.be.greaterThan(3);
@@ -423,7 +419,7 @@ describe('Radio', function() {
             // Make sure client return an error
             client.setInternalError(new Error('Test'));
 
-            radio.isPlaying(function(err) {
+            radio.isPlaying().catch(function(err) {
                 err.should.be.Error();
                 err.message.should.be.equal('Test');
 
@@ -434,7 +430,7 @@ describe('Radio', function() {
         it('should return error if MPD client cannot be got', function(done) {
             var radio = new Radio(getMpdPool(null));
 
-            radio.isPlaying(function(err) {
+            radio.isPlaying().catch(function(err) {
                 err.should.be.Error();
                 // This message is defined in MpdPool stub.
                 err.message.should.be.equal('The client is not specified');
@@ -447,9 +443,7 @@ describe('Radio', function() {
             var client = getMpdClient(),
                 radio = new Radio(getMpdPool(client));
 
-            radio.isPlaying(function(err) {
-                should(err).be.null();
-
+            radio.isPlaying().then(function() {
                 var commands = client.getRecordedCommands();
                 commands.length.should.be.equal(1);
                 commands[0].name.should.be.equal('status');
@@ -463,8 +457,7 @@ describe('Radio', function() {
                 radio = new Radio(getMpdPool(client));
 
             client.setInternalStatus({state: 'play'});
-            radio.isPlaying(function(err, isPlaying) {
-                should(err).be.null();
+            radio.isPlaying().then(function(isPlaying) {
                 isPlaying.should.be.true();
 
                 done();
@@ -476,8 +469,7 @@ describe('Radio', function() {
                 radio = new Radio(getMpdPool(client));
 
             client.setInternalStatus({state: 'stop'});
-            radio.isPlaying(function(err, isPlaying) {
-                should(err).be.null();
+            radio.isPlaying().then(function(isPlaying) {
                 isPlaying.should.be.false();
 
                 done();

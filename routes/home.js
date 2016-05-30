@@ -1,5 +1,5 @@
 var Router = require('express').Router,
-    async = require('async');
+    Promise = require('bluebird');
 
 /**
  * Extract client side appication state from server side application instance.
@@ -26,47 +26,27 @@ var extractApplicationState = function(app, callback) {
         }
     };
 
-    async.parallel([
-        function(cb) {
-            app.getStationsKeeper().all(function(err, stations) {
-                if (err) {
-                    return cb(err);
-                }
-
-                state.stations = stations;
-
-                cb(null);
-            });
-        },
-        function(cb) {
-            app.getRadio().isPlaying(function(err, isPlaying) {
-                if (err) {
-                    return cb(err);
-                }
-
-                if (!isPlaying) {
-                    state.currentStation = false;
-                }
-
-                cb(null);
-            });
-        },
-        function(cb) {
+    return Promise.all([
+        app.getStationsKeeper().all().then(function(stations) {
+            state.stations = stations;
+        }),
+        app.getRadio().isPlaying().then(function(isPlaying) {
+            if (!isPlaying) {
+                state.currentStation = false;
+            }
+        }),
+        new Promise(function(resolve, reject) {
             app.getSettings().get('alarm_station', function(err, station) {
                 if (err) {
-                    return cb(err);
+                    return reject(err);
                 }
 
                 state.alarmSettings.selectedStation = station || false;
-                cb(null);
+                resolve();
             });
-        }
-    ], function(err) {
-        if (err) {
-            return callback(err);
-        }
-
-        callback(null, state);
+        })
+    ]).then(function() {
+        return state;
     });
 };
 
@@ -81,15 +61,13 @@ module.exports = function(app) {
 
     // Register routes
     router.get('/', function(req, res, next) {
-        extractApplicationState(app, function(err, state) {
-            if (err) {
-                return next(err);
-            }
-
+        extractApplicationState(app).then(function(state) {
             // Render the page
             res.render('index', {
                 applicationState: JSON.stringify(state)
             });
+        }).catch(function(err) {
+            next(err);
         });
     });
 
