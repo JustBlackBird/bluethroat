@@ -125,7 +125,8 @@ var getMpdClient = function() {
  * @returns {Object}
  */
 var getMpdPool = function(client) {
-    var pool = getEventEmitter();
+    var pool = {},
+        clientsInUse = [];
 
     if (typeof client === 'undefined') {
         client = getMpdClient();
@@ -134,10 +135,22 @@ var getMpdPool = function(client) {
     // Define API methods to mimic real MpdPool instance.
     pool.getClient = function() {
         if (client) {
+            clientsInUse.push(client);
+
             return Promise.resolve(client);
         } else {
             return Promise.reject(new Error('The client is not specified'));
         }
+    };
+
+    pool.releaseClient = function(client) {
+        clientsInUse = clientsInUse.filter(function(currClient) {
+            return client !== currClient;
+        });
+    };
+
+    pool.getClientsInUse = function() {
+        return clientsInUse;
     };
 
     return pool;
@@ -224,7 +237,8 @@ describe('Radio', function() {
         it('should send "clear", "setvol", "add" and "play" commands to MPD server', function() {
             var client = getMpdClient(),
                 station = getRadioStation(),
-                radio = new Radio(getMpdPool(client));
+                pool = getMpdPool(client),
+                radio = new Radio(pool);
 
             radio.setCurrentStation(station);
 
@@ -240,12 +254,14 @@ describe('Radio', function() {
                 commands[2].name.should.be.equal('add');
                 commands[2].args[0].should.be.equal(station.url);
                 commands[3].name.should.be.equal('play');
+                pool.getClientsInUse().should.have.length(0);
             });
         });
 
         it('should return MPD client error "as is"', function() {
             var client = getMpdClient(),
-                radio = new Radio(getMpdPool(client));
+                pool = getMpdPool(client),
+                radio = new Radio(pool);
 
             // Make sure client return an error
             client.setInternalError(Error('Test'));
@@ -255,11 +271,13 @@ describe('Radio', function() {
             return radio.play().catch(function(err) {
                 err.should.be.Error();
                 err.message.should.be.equal('Test');
+                pool.getClientsInUse().should.have.length(0);
             });
         });
 
         it('should return error if MPD client cannot be got', function() {
-            var radio = new Radio(getMpdPool(null));
+            var pool = getMpdPool(null),
+                radio = new Radio(pool);
 
             radio.setCurrentStation(getRadioStation());
 
@@ -267,6 +285,7 @@ describe('Radio', function() {
                 err.should.be.Error();
                 // This message is defined in MpdPool stub.
                 err.message.should.be.equal('The client is not specified');
+                pool.getClientsInUse().should.have.length(0);
             });
         });
     });
@@ -274,19 +293,22 @@ describe('Radio', function() {
     describe('stop', function() {
         it('should send "stop" and "clear" commands to MPD server', function() {
             var client = getMpdClient(),
-                radio = new Radio(getMpdPool(client));
+                pool = getMpdPool(client),
+                radio = new Radio(pool);
 
             return radio.stop().then(function() {
                 var commands = client.getRecordedCommands();
                 commands.length.should.be.equal(2);
                 commands[0].name.should.be.equal('stop');
                 commands[1].name.should.be.equal('clear');
+                pool.getClientsInUse().should.have.length(0);
             });
         });
 
         it('should return MPD client error "as is"', function() {
             var client = getMpdClient(),
-                radio = new Radio(getMpdPool(client));
+                pool = getMpdPool(client),
+                radio = new Radio(pool);
 
             // Make sure client return an error
             client.setInternalError(new Error('Test'));
@@ -294,43 +316,51 @@ describe('Radio', function() {
             return radio.stop().catch(function(err) {
                 err.should.be.Error();
                 err.message.should.be.equal('Test');
+                pool.getClientsInUse().should.have.length(0);
             });
         });
 
         it('should return error if MPD client cannot be got', function() {
-            var radio = new Radio(getMpdPool(null));
+            var pool = getMpdPool(null),
+                radio = new Radio(pool);
 
             return radio.stop().catch(function(err) {
                 err.should.be.Error();
                 // This message is defined in MpdPool stub.
                 err.message.should.be.equal('The client is not specified');
+                pool.getClientsInUse().should.have.length(0);
             });
         });
     });
 
     describe('fadeIn', function() {
         it('should return error if no station was selected', function() {
-            var radio = new Radio(getMpdPool());
+            var pool = getMpdPool(),
+                radio = new Radio(pool);
 
             return radio.fadeIn(150).catch(function(err) {
                 err.should.be.Error();
                 err.message.should.be.equal('You should choose a station before play it.');
+                pool.getClientsInUse().should.have.length(0);
             });
         });
 
         it('should return error if too low duration is used', function() {
-            var radio = new Radio(getMpdPool());
+            var pool = getMpdPool(),
+                radio = new Radio(pool);
 
             radio.setCurrentStation(getRadioStation());
 
             return radio.fadeIn(50).catch(function(err) {
                 err.should.be.Error();
                 err.message.should.be.equal('Duration must be greater than or equal to 100');
+                pool.getClientsInUse().should.have.length(0);
             });
         });
 
         it('should return error if MPD client cannot be got', function() {
-            var radio = new Radio(getMpdPool(null));
+            var pool = getMpdPool(null),
+                radio = new Radio(pool);
 
             radio.setCurrentStation(getRadioStation());
 
@@ -338,12 +368,14 @@ describe('Radio', function() {
                 err.should.be.Error();
                 // This message is defined in MpdPool stub.
                 err.message.should.be.equal('The client is not specified');
+                pool.getClientsInUse().should.have.length(0);
             });
         });
 
         it('should return MPD client error "as is"', function() {
             var client = getMpdClient(),
-                radio = new Radio(getMpdPool(client));
+                pool = getMpdPool(client),
+                radio = new Radio(pool);
 
             // Make sure the client return error.
             client.setInternalError(new Error('Test'));
@@ -353,12 +385,14 @@ describe('Radio', function() {
             return radio.fadeIn(150).catch(function(err) {
                 err.should.be.Error();
                 err.message.should.be.equal('Test');
+                pool.getClientsInUse().should.have.length(0);
             });
         });
 
         it('should send correct commands to MPD server', function() {
             var client = getMpdClient(),
-                radio = new Radio(getMpdPool(client)),
+                pool = getMpdPool(client),
+                radio = new Radio(pool),
                 station = getRadioStation();
 
             radio.setCurrentStation(station);
@@ -387,6 +421,8 @@ describe('Radio', function() {
 
                 // Make sure the volume now is 100%
                 currentVolume.should.be.equal(100);
+
+                pool.getClientsInUse().should.have.length(0);
             });
         });
     });
@@ -394,7 +430,8 @@ describe('Radio', function() {
     describe('isPlaying', function() {
         it('should return MPD client error "as is"', function() {
             var client = getMpdClient(),
-                radio = new Radio(getMpdPool(client));
+                pool = getMpdPool(client),
+                radio = new Radio(pool);
 
             // Make sure client return an error
             client.setInternalError(new Error('Test'));
@@ -402,49 +439,60 @@ describe('Radio', function() {
             return radio.isPlaying().catch(function(err) {
                 err.should.be.Error();
                 err.message.should.be.equal('Test');
+                pool.getClientsInUse().should.have.length(0);
             });
         });
 
         it('should return error if MPD client cannot be got', function() {
-            var radio = new Radio(getMpdPool(null));
+            var pool = getMpdPool(null),
+                radio = new Radio(pool);
 
             return radio.isPlaying().catch(function(err) {
                 err.should.be.Error();
                 // This message is defined in MpdPool stub.
                 err.message.should.be.equal('The client is not specified');
+
+                pool.getClientsInUse().should.have.length(0);
             });
         });
 
         it('should send correct command to MPD server', function() {
             var client = getMpdClient(),
-                radio = new Radio(getMpdPool(client));
+                pool = getMpdPool(client),
+                radio = new Radio(pool);
 
             return radio.isPlaying().then(function() {
                 var commands = client.getRecordedCommands();
                 commands.length.should.be.equal(1);
                 commands[0].name.should.be.equal('status');
+
+                pool.getClientsInUse().should.have.length(0);
             });
         });
 
         it('should return true when the MPD state is "play"', function() {
             var client = getMpdClient(),
-                radio = new Radio(getMpdPool(client));
+                pool = getMpdPool(client),
+                radio = new Radio(pool);
 
             client.setInternalStatus({state: 'play'});
 
             return radio.isPlaying().then(function(isPlaying) {
                 isPlaying.should.be.true();
+                pool.getClientsInUse().should.have.length(0);
             });
         });
 
         it('should return false when the MPD state is "stop"', function() {
             var client = getMpdClient(),
-                radio = new Radio(getMpdPool(client));
+                pool = getMpdPool(client),
+                radio = new Radio(pool);
 
             client.setInternalStatus({state: 'stop'});
 
             return radio.isPlaying().then(function(isPlaying) {
                 isPlaying.should.be.false();
+                pool.getClientsInUse().should.have.length(0);
             });
         });
     });
