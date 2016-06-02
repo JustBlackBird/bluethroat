@@ -1,7 +1,7 @@
 var util = require('util'),
     should = require('should'),
     _ = require('lodash'),
-    RadioStationsKeeper = require('../lib/radio_stations_keeper');
+    RadioStationsKeeper = require('../../lib/radio_stations_keeper');
 
 /**
  * Builds correct station object by its ID.

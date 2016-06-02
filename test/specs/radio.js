@@ -1,25 +1,10 @@
 var util = require('util'),
-    events = require('events'),
     should = require('should'),
     _ = require('lodash'),
     Promise = require('bluebird'),
-    async = require('async'),
-    Radio = require('../lib/radio');
-
-/**
- * Builds an instance of EventEmitter class
- */
-var getEventEmitter = function() {
-    // Temporary constructor is used to prevent modifications of EventEmitter
-    // prototype.
-    var Tmp = function() {
-        events.EventEmitter.call(this);
-    };
-
-    util.inherits(Tmp, events.EventEmitter);
-
-    return new Tmp();
-};
+    Radio = require('../../lib/radio'),
+    FakeMpdClient = require('../mocks/mpd_client'),
+    FakeMpdPool = require('../mocks/mpd_pool');
 
 /**
  * Creates a valid radio station.
@@ -42,79 +27,7 @@ var getRadioStation = function() {
  * @returns {Object}
  */
 var getMpdClient = function() {
-    var noop = function() {},
-        client = getEventEmitter();
-
-    // A storage for set commands.
-    client._commands = [];
-
-    // Internal Client's status
-    client._status = {
-        state: 'stop'
-    };
-
-    // This is an Error wich should be returned any time a command is sent.
-    // false means no error should be returned.
-    client._error = false;
-
-    client.sendCommand = function(command, callback) {
-        // Make sure stub works fine even if there is no callback specified
-        var done = callback || noop;
-
-        client._commands.push(command);
-
-        if (client._error) {
-            return callback(client._error);
-        }
-
-        var response = '';
-        if (command.name === 'status') {
-            Object.keys(client._status).forEach(function(key) {
-                response += key + ': ' + client._status[key] + '\n';
-            });
-        }
-
-        done(null, response);
-    };
-
-    // This stub is just run "sendCommand" several times.
-    client.sendCommands = function(commands, callback) {
-        // Make sure stub works fine even if there is no callback specified
-        var done = callback || noop;
-
-        var combinedResponse = '';
-        async.eachSeries(commands, function(command, next) {
-            client.sendCommand(command, function(err, response) {
-                combinedResponse += (response || '');
-                next(err);
-            });
-        }, function(err) {
-            if (err) {
-                return done(err);
-            }
-
-            done(null, combinedResponse);
-        });
-    };
-
-    // This is not a part of MpdClient and is used spy for commands calls.
-    client.getRecordedCommands = function() {
-        return this._commands;
-    };
-
-    // This is not a part of MpdClient API and is used to alter internal
-    // client's status.
-    client.setInternalStatus = function(status) {
-        client._status = status;
-    };
-
-    // This is not a part of MpdClient API and is used to return a error for
-    // commands.
-    client.setInternalError = function(err) {
-        client._error = err;
-    };
-
-    return client;
+    return new FakeMpdClient();
 };
 
 /**
@@ -125,35 +38,7 @@ var getMpdClient = function() {
  * @returns {Object}
  */
 var getMpdPool = function(client) {
-    var pool = {},
-        clientsInUse = [];
-
-    if (typeof client === 'undefined') {
-        client = getMpdClient();
-    }
-
-    // Define API methods to mimic real MpdPool instance.
-    pool.getClient = function() {
-        if (client) {
-            clientsInUse.push(client);
-
-            return Promise.resolve(client);
-        } else {
-            return Promise.reject(new Error('The client is not specified'));
-        }
-    };
-
-    pool.releaseClient = function(client) {
-        clientsInUse = clientsInUse.filter(function(currClient) {
-            return client !== currClient;
-        });
-    };
-
-    pool.getClientsInUse = function() {
-        return clientsInUse;
-    };
-
-    return pool;
+    return new FakeMpdPool(client);
 };
 
 describe('Radio', function() {
@@ -254,7 +139,7 @@ describe('Radio', function() {
                 commands[2].name.should.be.equal('add');
                 commands[2].args[0].should.be.equal(station.url);
                 commands[3].name.should.be.equal('play');
-                pool.getClientsInUse().should.have.length(0);
+                pool.getClientsInUse().should.be.equal(0);
             });
         });
 
@@ -271,7 +156,7 @@ describe('Radio', function() {
             return radio.play().catch(function(err) {
                 err.should.be.Error();
                 err.message.should.be.equal('Test');
-                pool.getClientsInUse().should.have.length(0);
+                pool.getClientsInUse().should.be.equal(0);
             });
         });
 
@@ -285,7 +170,7 @@ describe('Radio', function() {
                 err.should.be.Error();
                 // This message is defined in MpdPool stub.
                 err.message.should.be.equal('The client is not specified');
-                pool.getClientsInUse().should.have.length(0);
+                pool.getClientsInUse().should.be.equal(0);
             });
         });
     });
@@ -301,7 +186,7 @@ describe('Radio', function() {
                 commands.length.should.be.equal(2);
                 commands[0].name.should.be.equal('stop');
                 commands[1].name.should.be.equal('clear');
-                pool.getClientsInUse().should.have.length(0);
+                pool.getClientsInUse().should.be.equal(0);
             });
         });
 
@@ -316,7 +201,7 @@ describe('Radio', function() {
             return radio.stop().catch(function(err) {
                 err.should.be.Error();
                 err.message.should.be.equal('Test');
-                pool.getClientsInUse().should.have.length(0);
+                pool.getClientsInUse().should.be.equal(0);
             });
         });
 
@@ -328,7 +213,7 @@ describe('Radio', function() {
                 err.should.be.Error();
                 // This message is defined in MpdPool stub.
                 err.message.should.be.equal('The client is not specified');
-                pool.getClientsInUse().should.have.length(0);
+                pool.getClientsInUse().should.be.equal(0);
             });
         });
     });
@@ -341,7 +226,7 @@ describe('Radio', function() {
             return radio.fadeIn(150).catch(function(err) {
                 err.should.be.Error();
                 err.message.should.be.equal('You should choose a station before play it.');
-                pool.getClientsInUse().should.have.length(0);
+                pool.getClientsInUse().should.be.equal(0);
             });
         });
 
@@ -354,7 +239,7 @@ describe('Radio', function() {
             return radio.fadeIn(50).catch(function(err) {
                 err.should.be.Error();
                 err.message.should.be.equal('Duration must be greater than or equal to 100');
-                pool.getClientsInUse().should.have.length(0);
+                pool.getClientsInUse().should.be.equal(0);
             });
         });
 
@@ -368,7 +253,7 @@ describe('Radio', function() {
                 err.should.be.Error();
                 // This message is defined in MpdPool stub.
                 err.message.should.be.equal('The client is not specified');
-                pool.getClientsInUse().should.have.length(0);
+                pool.getClientsInUse().should.be.equal(0);
             });
         });
 
@@ -385,7 +270,7 @@ describe('Radio', function() {
             return radio.fadeIn(150).catch(function(err) {
                 err.should.be.Error();
                 err.message.should.be.equal('Test');
-                pool.getClientsInUse().should.have.length(0);
+                pool.getClientsInUse().should.be.equal(0);
             });
         });
 
@@ -422,7 +307,7 @@ describe('Radio', function() {
                 // Make sure the volume now is 100%
                 currentVolume.should.be.equal(100);
 
-                pool.getClientsInUse().should.have.length(0);
+                pool.getClientsInUse().should.be.equal(0);
             });
         });
     });
@@ -439,7 +324,7 @@ describe('Radio', function() {
             return radio.isPlaying().catch(function(err) {
                 err.should.be.Error();
                 err.message.should.be.equal('Test');
-                pool.getClientsInUse().should.have.length(0);
+                pool.getClientsInUse().should.be.equal(0);
             });
         });
 
@@ -452,7 +337,7 @@ describe('Radio', function() {
                 // This message is defined in MpdPool stub.
                 err.message.should.be.equal('The client is not specified');
 
-                pool.getClientsInUse().should.have.length(0);
+                pool.getClientsInUse().should.be.equal(0);
             });
         });
 
@@ -466,7 +351,7 @@ describe('Radio', function() {
                 commands.length.should.be.equal(1);
                 commands[0].name.should.be.equal('status');
 
-                pool.getClientsInUse().should.have.length(0);
+                pool.getClientsInUse().should.be.equal(0);
             });
         });
 
@@ -479,7 +364,7 @@ describe('Radio', function() {
 
             return radio.isPlaying().then(function(isPlaying) {
                 isPlaying.should.be.true();
-                pool.getClientsInUse().should.have.length(0);
+                pool.getClientsInUse().should.be.equal(0);
             });
         });
 
@@ -492,7 +377,7 @@ describe('Radio', function() {
 
             return radio.isPlaying().then(function(isPlaying) {
                 isPlaying.should.be.false();
-                pool.getClientsInUse().should.have.length(0);
+                pool.getClientsInUse().should.be.equal(0);
             });
         });
     });

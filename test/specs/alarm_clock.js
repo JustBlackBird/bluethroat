@@ -1,6 +1,6 @@
 var should = require('should'),
     sinon = require('sinon'),
-    AlarmClock = require('../lib/alarm_clock');
+    AlarmClock = require('../../lib/alarm_clock');
 
 describe('AlarmClock', function() {
 

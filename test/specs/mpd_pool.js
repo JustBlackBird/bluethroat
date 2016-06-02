@@ -1,28 +1,17 @@
 var events = require('events'),
-    util = require('util'),
     should = require('should'),
     sinon = require('sinon'),
     mpd = require('mpd'),
     Promise = require('bluebird'),
-    MpdPool = require('../lib/mpd_pool');
-
-/**
- * A simple mock for MPD client.
- *
- * @constructor
- */
-var FakeClient = function() {
-    events.EventEmitter.call(this);
-};
-
-util.inherits(FakeClient, events.EventEmitter);
+    FakeMpdClient = require('../mocks/mpd_client'),
+    MpdPool = require('../../lib/mpd_pool');
 
 describe('MpdPool', function() {
     var connectStub = null;
 
     beforeEach(function() {
         connectStub = sinon.stub(mpd, 'connect', function() {
-            var client = new FakeClient();
+            var client = new FakeMpdClient();
 
             setTimeout(function() {
                 client.emit('connect');
@@ -77,7 +66,7 @@ describe('MpdPool', function() {
             var mpdPool = new MpdPool();
 
             return mpdPool.getClient().then(function(client) {
-                client.should.be.instanceof(FakeClient);
+                client.should.be.instanceof(FakeMpdClient);
             });
         });
 
@@ -88,7 +77,7 @@ describe('MpdPool', function() {
             // Use custom stub to return client's with error.
             mpd.connect.restore();
             connectStub = sinon.stub(mpd, 'connect', function() {
-                var client = new FakeClient();
+                var client = new FakeMpdClient();
 
                 setTimeout(function() {
                     client.emit('error', clientError);

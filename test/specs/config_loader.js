@@ -1,7 +1,7 @@
 var path = require('path'),
     should = require('should'),
     mockFs = require('mock-fs'),
-    ConfigLoader = require('../lib/config_loader');
+    ConfigLoader = require('../../lib/config_loader');
 
 var getCorrectConfig = function() {
     return {
