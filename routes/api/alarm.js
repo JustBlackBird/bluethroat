@@ -1,6 +1,6 @@
 var Router = require('express').Router,
     _ = require('lodash'),
-    async = require('async');
+    Promise = require('bluebird');
 
 /**
  * Validate passed in data to make sure all values are passed and that they
@@ -60,23 +60,14 @@ module.exports = function(alarm, settings) {
             alarm.stop();
         }
 
-        async.parallel([
-            function(cb) {
-                var time = _.extend({}, data.time, {seconds: 0});
-                settings.set('alarm_time', time, cb);
-            },
-            function(cb) {
-                settings.set('alarm_enabled', data.isEnabled, cb);
-            },
-            function(cb) {
-                settings.set('alarm_station', data.selectedStation, cb);
-            }
-        ], function(err) {
-            if (err) {
-                return next(err);
-            }
-
+        Promise.all([
+            settings.set('alarm_time', _.extend({}, data.time, {seconds: 0})),
+            settings.set('alarm_enabled', data.isEnabled),
+            settings.set('alarm_station', data.selectedStation)
+        ]).then(function() {
             res.status(200).json({});
+        }).catch(function(error) {
+            next(error);
         });
     });
 

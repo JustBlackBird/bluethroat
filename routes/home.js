@@ -35,15 +35,8 @@ var extractApplicationState = function(app, callback) {
                 state.currentStation = false;
             }
         }),
-        new Promise(function(resolve, reject) {
-            app.getSettings().get('alarm_station', function(err, station) {
-                if (err) {
-                    return reject(err);
-                }
-
-                state.alarmSettings.selectedStation = station || false;
-                resolve();
-            });
+        app.getSettings().get('alarm_station').then(function(station) {
+            state.alarmSettings.selectedStation = station || false;
         })
     ]).then(function() {
         return state;

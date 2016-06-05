@@ -1,5 +1,4 @@
-var Router = require('express').Router,
-    Promise = require('bluebird');
+var Router = require('express').Router;
 
 /**
  * Initialize API routes for radio control.
@@ -18,7 +17,7 @@ module.exports = function(radio, stationsKeeper) {
             if (station === false) {
                 res.status(500).json({error: 'Station is not found'});
 
-                return Promise.resolve();
+                return;
             }
 
             radio.setCurrentStation(station);
