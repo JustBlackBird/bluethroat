@@ -2,3 +2,7 @@
 .messages-wrapper {
     margin-top: 10px;
 }
+
+.radio-station {
+    cursor: default;
+}
