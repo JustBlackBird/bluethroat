@@ -10,7 +10,7 @@ var React = require('react');
  *  - items
  *  - onChange
  */
-module.exports = React.createClass({
+var Tabs = React.createClass({
     propTypes: {
         activeTab: React.PropTypes.number.isRequired,
         items: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
@@ -41,3 +41,5 @@ module.exports = React.createClass({
         );
     }
 });
+
+module.exports = Tabs;
