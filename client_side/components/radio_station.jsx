@@ -14,7 +14,8 @@ module.exports = React.createClass({
     propTypes: {
         id: React.PropTypes.string.isRequired,
         name: React.PropTypes.string.isRequired,
-        isPlaying: React.PropTypes.bool.isRequired
+        isPlaying: React.PropTypes.bool.isRequired,
+        clickHandler: React.PropTypes.func.isRequired
     },
 
     handleClick: function() {
