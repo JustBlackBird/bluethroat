@@ -7,6 +7,10 @@
     cursor: default;
 }
 
+.nav a {
+    cursor: pointer;
+}
+
 .swipe-container > div {
     min-height: 100%;
     height: 100% !important;
