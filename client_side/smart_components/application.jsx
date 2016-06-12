@@ -1,9 +1,11 @@
 var React = require('react'),
     connect = require('react-redux').connect,
     actions = require('../actions'),
+    SwipeableViews = require('react-swipeable-views').default,
     Radio = require('../components/radio.jsx'),
     MessageContainer = require('../components/message_container.jsx'),
-    AlarmSettings = require('../components/alarm_settings.jsx');
+    AlarmSettings = require('../components/alarm_settings.jsx'),
+    Tabs = require('../components/tabs.jsx');
 
 /**
  * A component for the whole Application.
@@ -27,6 +29,12 @@ var Application = React.createClass({
         messages: React.PropTypes.array.isRequired
     },
 
+    getInitialState: function() {
+        return {
+            activeTab: 0
+        };
+    },
+
     handlePlay: function(stationId) {
         this.props.dispatch(actions.radio.play(stationId));
     },
@@ -39,23 +47,42 @@ var Application = React.createClass({
         this.props.dispatch(actions.alarmSettings.update(settings));
     },
 
+    handleTabChange: function(index) {
+        this.setState({
+            activeTab: index
+        });
+    },
+
     render: function() {
         var alarmSettings = this.props.alarmSettings;
 
         return (
             <div>
                 <MessageContainer messages={this.props.messages} />
-                <Radio
-                    stations={this.props.stations}
-                    currentStation={this.props.currentStation}
-                    onPlay={this.handlePlay}
-                    onStop={this.handleStop}
+
+                <Tabs
+                    items={['Radio', 'Alarm']}
+                    activeTab={this.state.activeTab}
+                    onChange={this.handleTabChange}
                 />
-                <AlarmSettings
-                    onChange={this.handleAlarmSettingsChange}
-                    stations={this.props.stations}
-                    {...alarmSettings}
-                />
+
+                <SwipeableViews
+                    index={this.state.activeTab}
+                    onChangeIndex={this.handleTabChange}
+                    className="swipe-container"
+                >
+                    <Radio
+                        stations={this.props.stations}
+                        currentStation={this.props.currentStation}
+                        onPlay={this.handlePlay}
+                        onStop={this.handleStop}
+                    />
+                    <AlarmSettings
+                        onChange={this.handleAlarmSettingsChange}
+                        stations={this.props.stations}
+                        {...alarmSettings}
+                    />
+                </SwipeableViews>
             </div>
         );
     }

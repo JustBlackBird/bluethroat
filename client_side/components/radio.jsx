@@ -36,7 +36,7 @@ var Radio = React.createClass({
 
     render: function() {
         return (
-            <div className="list-group radio">
+            <div className="list-group radio swipe-view-content">
                 {this.props.stations.map(function(station) {
                     return (
                         <RadioStation

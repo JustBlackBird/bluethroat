@@ -85,7 +85,7 @@ var AlarmSettings = React.createClass({
 
     render: function() {
         return (
-            <div>
+            <div className="alarm-settings swipe-view-content">
                 <h2>Alarm Settings</h2>
 
                 <form>
