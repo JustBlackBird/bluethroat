@@ -10,7 +10,7 @@ describe('Settings', function() {
     beforeEach(function(done) {
         // On some environments (like RaspberryPi 1) running mock-couch can
         // took a long time. Give some more time to setup test environment.
-        this.timeout(3000);
+        this.timeout(4000);
 
         couchdb = mockCouch.createServer();
         couchdb.addDB('settings', []);
